@@ -18,16 +18,14 @@ if (!File.Exists(file))
     Environment.Exit(2);
 }
 
-var scriptOption = ScriptOptions.Default
-    .WithImports("System", "System.IO", "System.Text", "BinPlayground.Types")
-    .WithReferences(typeof(FileStream).Assembly, typeof(ByteArrayExtensions).Assembly);
-
 var interactiveConfig = new InteractiveConfig();
 
 await using (var fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read))
 {
     var playground = new BinPlayground.BinPlayground(fs, interactiveConfig);
     ulong commandNum = 0;
+
+    ScriptState<object>? res = null;
 
     while (true)
     {
@@ -44,11 +42,19 @@ await using (var fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.
                 goto exit;
         }
 
-        var scr = CSharpScript.Create(command, globalsType: typeof(BinPlayground.BinPlayground), options: scriptOption);
         object ret;
         try
         {
-            var res = await scr.RunAsync(playground);
+            if (res == null)
+            {
+                var scriptOption = ScriptOptions.Default
+                    .WithImports("System", "System.IO", "System.Text", "BinPlayground.Types")
+                    .WithReferences(typeof(FileStream).Assembly, typeof(ByteArrayExtensions).Assembly);
+                var scr = CSharpScript.Create(command, globalsType: typeof(BinPlayground.BinPlayground), options: scriptOption);
+                res = await scr.RunAsync(playground);
+            }
+            else
+                res = await res.ContinueWithAsync(command);
             ret = res.ReturnValue;
         }
         catch (Exception e)
