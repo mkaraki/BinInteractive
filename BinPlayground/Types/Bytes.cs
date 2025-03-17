@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using HeyRed.Mime;
+using System;
 using System.Text;
-using System.Threading.Tasks;
-using HeyRed.Mime;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Global
@@ -41,20 +38,21 @@ namespace BinPlayground.Types
         }
 
         public string utf8 => Encoding.UTF8.GetString(_bytes);
-    
+
         public string utf16 => Encoding.Unicode.GetString(_bytes);
-    
+
         public string wide => Encoding.Unicode.GetString(_bytes);
-    
+
         public string utf32 => Encoding.UTF32.GetString(_bytes);
-    
+
         public string hex => BitConverter.ToString(_bytes).Replace("-", " ");
-    
+
         public BytesBitmap bitmap => new(_bytes);
 
         public BytesBitmap1D bitmap1d => new(_bytes);
 
-        public string magic {
+        public string magic
+        {
             get
             {
                 using var libMagic = new Magic(MagicOpenFlags.MAGIC_NONE);
@@ -63,7 +61,7 @@ namespace BinPlayground.Types
         }
 
         public string file => magic;
-    
+
         public override string ToString() => $"({_bytes.LongLength}) {hex}";
     }
 }

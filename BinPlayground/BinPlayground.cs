@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using BinPlayground.Types;
+using System;
 using System.IO;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using BinPlayground.Types;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Global

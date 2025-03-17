@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BinPlayground;
+﻿using BinPlayground;
 using BinPlayground.Types;
 using Kokuban;
-using Kokuban.AnsiEscape;
 
 namespace BinInteractive
 {
@@ -29,7 +23,7 @@ namespace BinInteractive
 
                 if (i % interactiveConfig.HexWidth == 0)
                 {
-                    await Console.Out.WriteAsync($"{realPos>>16:X4}:{realPos&0xFFFF:X4}:");
+                    await Console.Out.WriteAsync($"{realPos >> 16:X4}:{realPos & 0xFFFF:X4}:");
                 }
                 else if (i != 0 && i % 16 == 0)
                 {

@@ -1,11 +1,9 @@
-﻿using System.Runtime.Intrinsics.Arm;
-using System.Security.Cryptography;
-using BinInteractive;
+﻿using BinInteractive;
 using BinPlayground;
 using BinPlayground.Types;
+using Kokuban;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
-using Kokuban;
 
 if (args.Length != 1)
 {
@@ -70,34 +68,34 @@ await using (var fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.
                 await ConsoleUtils.PrintBytes(bytes, interactiveConfig);
                 break;
             case IBytesBitmap bitmap:
-            {
-                for (ulong i = 0; i < bitmap.Length; i++)
                 {
-                    if (interactiveConfig.BitmapWidth > 0 && i % (uint)interactiveConfig.BitmapWidth == 0)
+                    for (ulong i = 0; i < bitmap.Length; i++)
                     {
+                        if (interactiveConfig.BitmapWidth > 0 && i % (uint)interactiveConfig.BitmapWidth == 0)
+                        {
+                            Console.ResetColor();
+                            await Console.Out.WriteLineAsync();
+                        }
+
+                        var color = bitmap.GetColor(i);
+                        var bgRgb = Chalk.BgRgb(color[0], color[1], color[2]);
+                        await Console.Out.WriteAsync(bgRgb.Render(" "));
                         Console.ResetColor();
-                        await Console.Out.WriteLineAsync();
                     }
 
-                    var color = bitmap.GetColor(i);
-                    var bgRgb = Chalk.BgRgb(color[0], color[1], color[2]);
-                    await Console.Out.WriteAsync(bgRgb.Render(" "));
+                    await Console.Out.WriteLineAsync();
                     Console.ResetColor();
+                    break;
                 }
-
-                await Console.Out.WriteLineAsync();
-                Console.ResetColor();
-                break;
-            }
             default:
-            {
-                var retStr = ret.ToString();
-                if (!string.IsNullOrEmpty(retStr))
                 {
-                    await Console.Out.WriteLineAsync(retStr);
+                    var retStr = ret.ToString();
+                    if (!string.IsNullOrEmpty(retStr))
+                    {
+                        await Console.Out.WriteLineAsync(retStr);
+                    }
+                    break;
                 }
-                break;
-            }
         }
     }
 }
