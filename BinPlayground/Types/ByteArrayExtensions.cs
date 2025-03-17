@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Global
 
-namespace BinInteractive.Types
+namespace BinPlayground.Types
 {
     public static class ByteArrayExtensions
     {

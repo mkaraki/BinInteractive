@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using BinInteractive.Types;
+using BinPlayground.Types;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Global
 
-namespace BinInteractive
+namespace BinPlayground
 {
-    public class BinPlayground(FileStream file, InteractiveConfig conf)
+    public class BinPlayground(Stream file, InteractiveConfig conf)
     {
 #pragma warning disable IDE0051 // Remove unused private members
 #pragma warning disable IDE1006 // Naming Styles
-        public readonly FileStream _file = file;
+        public readonly Stream _file = file;
 
         public readonly InteractiveConfig config = conf;
 

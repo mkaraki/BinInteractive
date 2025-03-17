@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BinInteractive.Types
+namespace BinPlayground.Types
 {
     public interface IBytesBitmap
     {

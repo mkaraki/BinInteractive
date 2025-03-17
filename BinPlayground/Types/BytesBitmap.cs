@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 // ReSharper disable UseUtf8StringLiteral
 
-namespace BinInteractive.Types
+namespace BinPlayground.Types
 {
     public class BytesBitmap : IBytesBitmap
     {

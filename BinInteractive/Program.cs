@@ -1,7 +1,8 @@
 ﻿using System.Runtime.Intrinsics.Arm;
 using System.Security.Cryptography;
 using BinInteractive;
-using BinInteractive.Types;
+using BinPlayground;
+using BinPlayground.Types;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Kokuban;
@@ -20,14 +21,14 @@ if (!File.Exists(file))
 }
 
 var scriptOption = ScriptOptions.Default
-    .WithImports("System", "System.IO", "System.Text", "BinInteractive.Types")
+    .WithImports("System", "System.IO", "System.Text", "BinPlayground.Types")
     .WithReferences(typeof(FileStream).Assembly, typeof(ByteArrayExtensions).Assembly);
 
 var interactiveConfig = new InteractiveConfig();
 
 await using (var fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read))
 {
-    var playground = new BinPlayground(fs, interactiveConfig);
+    var playground = new BinPlayground.BinPlayground(fs, interactiveConfig);
     ulong commandNum = 0;
 
     while (true)
@@ -45,7 +46,7 @@ await using (var fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.
                 goto exit;
         }
 
-        var scr = CSharpScript.Create(command, globalsType: typeof(BinPlayground), options: scriptOption);
+        var scr = CSharpScript.Create(command, globalsType: typeof(BinPlayground.BinPlayground), options: scriptOption);
         object ret;
         try
         {

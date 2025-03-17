@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using HeyRed.Mime;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Global
 
-namespace BinInteractive.Types
+namespace BinPlayground.Types
 {
     public class Bytes(byte[] bytes, ulong offset = 0)
     {
@@ -53,6 +53,16 @@ namespace BinInteractive.Types
         public BytesBitmap bitmap => new(_bytes);
 
         public BytesBitmap1D bitmap1d => new(_bytes);
+
+        public string magic {
+            get
+            {
+                using var libMagic = new Magic(MagicOpenFlags.MAGIC_NONE);
+                return libMagic.Read(_bytes, _bytes.Length);
+            }
+        }
+
+        public string file => magic;
     
         public override string ToString() => $"({_bytes.LongLength}) {hex}";
     }
