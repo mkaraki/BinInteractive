@@ -47,7 +47,7 @@ namespace BinInteractive
                     await Console.Out.WriteAsync("  ");
                     int startIndex = (int)i - interactiveConfig.HexWidth + 1;
                     int endIndex = (int)i;
-                    var b = new Bytes(bytes.byteArray[startIndex..endIndex]);
+                    var b = new Bytes(bytes.byteArray[startIndex..(endIndex + 1)]);
 
                     if (!interactiveConfig.OmitAsciiFromHex)
                     {
