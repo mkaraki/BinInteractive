@@ -34,14 +34,13 @@
 		if (Bitmap == null || _context == null)
 			return;
 
-		await _context.SetFillStyleAsync("black");
-		await _context.FillRectAsync(0, 0, _canvasReference.Width, _canvasReference.Height);
-
 		var totalLength = Bitmap.Length;
 
 		var heightNum = (totalLength / BIT_WIDTH) + 1;
 
 		await _context.BeginBatchAsync();
+
+		await _context.ClearRectAsync(0, 0, _canvasReference.Width, _canvasReference.Height);
 
 		for (ulong h = 0; h < heightNum; h++)
 		{
