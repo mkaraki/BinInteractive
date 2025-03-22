@@ -18,7 +18,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.85);
+    color: white;
 }
 
 .hide {
@@ -35,6 +36,12 @@
     }
 }
 
+.bitmap-view {
+    width: 160px;
+    float: left;
+    margin-right: 10px;
+}
+
 .hex-and-ascii-view {
     width: 520px;
     height: calc(100vh - 40px);
@@ -45,6 +52,6 @@
 .utilities {
     float: left;
     min-width: 250px;
-    width: calc(100vw - 560px);
+    width: calc(100vw - calc(560px + 180px));
     overflow-x: scroll;
 }

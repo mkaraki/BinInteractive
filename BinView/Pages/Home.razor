@@ -30,6 +30,7 @@
 		<a href="#control" @onclick="SeekNext">Read next @(READ_AMOUNT)</a>
 	</div>
 	<div>
+		<BitmapView Bytes="_bytes" @ref="_bitmapViewComponent"></BitmapView>
 		<HexAndAsciiView Bytes="_bytes" @bind-SelectedBytes="_selectedBytes" @bind-LazySelectedBytes="_lazySelectedBytes" />
 		<div class="utilities">
 			<BytesUtilities Bytes="_selectedBytes" />
@@ -45,6 +46,8 @@
 }
 
 @code {
+
+	private BitmapView _bitmapViewComponent = new();
 
 	private const long READ_AMOUNT = 0x1000;
 
@@ -167,7 +170,9 @@
 			_bytes = new Bytes(buffer, (ulong)pos);
 		}
 
-		_loadingState = "Bytes object successfully prepared";
+		_loadingState = "Generating bitmap";
+		_bitmapViewComponent.Bytes = _bytes;
+		await _bitmapViewComponent.Update();
 	}
 
 	private async Task Seek(Stream stream, long pos)

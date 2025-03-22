@@ -1,0 +1,71 @@
+﻿@using BinPlayground.Types
+@using Blazor.Extensions
+@using Blazor.Extensions.Canvas
+@using Blazor.Extensions.Canvas.Canvas2D
+
+<div class="bitmap-view">
+	@if (Bitmap != null)
+	{
+		<BECanvas Width="160" Height="215" @ref="_canvasReference"></BECanvas>
+	}
+</div>
+
+@code {
+	private Canvas2DContext? _context;
+
+	protected BECanvasComponent _canvasReference;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		_context = await _canvasReference.CreateCanvas2DAsync();
+
+		await Update();
+	}
+
+	private const int BIT_WIDTH = 32;
+
+	private const int BIT_SIZE = 5;
+
+	[Parameter]
+	public Bytes? Bytes { get; set; }
+
+	public async Task Update()
+	{
+		if (Bitmap == null || _context == null)
+			return;
+
+		await _context.SetFillStyleAsync("black");
+		await _context.FillRectAsync(0, 0, _canvasReference.Width, _canvasReference.Height);
+
+		var totalLength = Bitmap.Length;
+
+		var heightNum = (totalLength / BIT_WIDTH) + 1;
+
+		await _context.BeginBatchAsync();
+
+		for (ulong h = 0; h < heightNum; h++)
+		{
+			for (ulong w = 0; w < BIT_WIDTH; w++)
+			{
+				var index = h * BIT_WIDTH + w;
+				if (index >= totalLength)
+				{
+					break;
+				}
+
+				var color = Bitmap.GetColor(index);
+				var colorString = $"rgb({color[0]} {color[1]} {color[2]})";
+
+				var x = w * BIT_SIZE;
+				var y = h * BIT_SIZE;
+
+				await _context.SetFillStyleAsync(colorString);
+				await _context.FillRectAsync(x, y, 10, 10);
+			}
+		}
+
+		await _context.EndBatchAsync();
+	}
+
+	private IBytesBitmap? Bitmap => Bytes?.bitmap;
+}
