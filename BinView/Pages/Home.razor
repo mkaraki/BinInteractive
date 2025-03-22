@@ -1,0 +1,147 @@
+﻿@page "/"
+@using BinPlayground
+@using BinPlayground.Types
+@using BinView.Components
+
+<PageTitle>Home</PageTitle>
+
+<div class="loading-screen @(_loading ? "" : "hide")">
+	<p>Loading: @(_loadingState)</p>
+</div>
+<div class="@((_bytes == null) ? "" : "hide")">
+	<InputFile OnChange="FileOnChange"></InputFile><br />
+	<button @onclick="OpenFile">Open file</button>
+</div>
+@if (_bytes != null)
+{
+	<button @onclick="CloseFile">Close file</button>
+	<div>
+		dec <input type="number" min="0" @bind="_seekPos" />
+		hex <input type="text" @bind="SeekPosHex" />
+		<button @onclick="Seek">Seek</button>
+	</div>
+	<div>
+		File size: @(_fileSize)
+	</div>
+	<HexAndAsciiView Bytes="_bytes" />
+}
+
+@code {
+
+	private const long READ_AMOUNT = 0x1000;
+
+	private const long UNSEEN_READ_AMOUNT = 0x10000;
+
+	private IBrowserFile? _selectedFile = null;
+
+	private Bytes? _bytes = null;
+
+	private ulong _seekPos = 0;
+
+	private string SeekPosHex
+	{
+		get => _seekPos.ToString("X");
+		set
+		{
+			if (ulong.TryParse(value, System.Globalization.NumberStyles.HexNumber, null, out var v))
+				_seekPos = v;
+		}
+	}
+
+	private bool _loading = false;
+
+	private string _loadingState = "";
+
+	private ulong _fileSize = 0;
+
+	private void FileOnChange(InputFileChangeEventArgs e)
+	{
+		try
+		{
+			_selectedFile = e.File;
+		}
+		catch
+		{
+			_selectedFile = null;
+		}
+	}
+
+	private async Task OpenFile()
+	{
+		if (_selectedFile == null) return;
+
+		_loading = true;
+
+		await Seek(0);
+
+		_loading = false;
+	}
+
+	private void CloseFile()
+	{
+		_bytes = null;
+	}
+
+	private async Task Seek()
+	{
+		_loading = true;
+		_loadingState = "Seek...";
+
+		await Seek((long)_seekPos);
+
+		_loading = false;
+	}
+
+	private async Task Seek(long pos)
+	{
+		if (_selectedFile == null)
+			return;
+
+		await using (var rs = _selectedFile.OpenReadStream(maxAllowedSize: long.MaxValue))
+		{
+			_fileSize = (ulong)rs.Length;
+
+
+			if (rs.Length == 0)
+			{ 
+				return;
+			}
+			if (pos >= rs.Length)
+			{
+				pos = rs.Length - 1;
+				_seekPos = (ulong)rs.Length - 1;
+			}
+
+			_loadingState = "seeking file stream to position";
+			await Seek(rs, pos);
+
+			var readAmount = Math.Min(READ_AMOUNT, Math.Max(0, rs.Length - pos));
+			Console.WriteLine($"Reading {readAmount}");
+			var buffer = new byte[readAmount];
+			_loadingState = "Reading file stream to buffer";
+			await rs.ReadExactlyAsync(buffer, 0, buffer.Length);
+
+			_bytes = new Bytes(buffer, (ulong)pos);
+		}
+
+		_loadingState = "Bytes object successfully prepared";
+	}
+
+	private async Task Seek(Stream stream, long pos)
+	{
+		//stream.Position = 0;
+
+		ulong seekNum = 0;
+
+		while (stream.Position != pos)
+		{
+			var seekAmount = Math.Min(UNSEEN_READ_AMOUNT, pos - stream.Position);
+
+			_loadingState = $"Seeking {seekAmount} bytes... {++seekNum}";
+
+			var buffer = new byte[seekAmount];
+			await stream.ReadExactlyAsync(buffer, 0, buffer.Length);
+		}
+	}
+
+}

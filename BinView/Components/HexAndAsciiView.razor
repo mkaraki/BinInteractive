@@ -1,0 +1,78 @@
+﻿@using BinPlayground.Types
+
+<p>@(b.Length) bytes</p>
+
+@for (var i = 0; i < b.Length; i += 16)
+{
+		var line = b[i..Math.Min(i + 16, b.Length)];
+
+		// Address
+		<code class="address-view-line">
+			@(
+				((ulong)i + Bytes.offset).ToString("X8")
+			)
+		</code>
+
+		// Hex view
+		<code class="hex-view-line">
+			@for (var j = 0; j < 16; j++)
+			{
+				if (j < line.Length)
+				{
+					<span
+						style="background-color: @(
+												 line[j] == 0 ? "black" :
+													 line[j] < 0x40 ? "gray" :
+													 line[j] < 0x80 ? "blue" :
+													 line[j] < 0xc0 ? "yellow" :
+													 line[j] < 0xff ? "red" :
+													 /* line[j] == 0xff */ "white"
+													 ) !important;
+							   color: @(
+												 line[j] == 0 ? "gray" :
+													 line[j] < 0x40 ? "white" :
+													 line[j] < 0x80 ? "white" :
+													 line[j] < 0xc0 ? "black" :
+													 line[j] < 0xff ? "white" :
+													 /* line[j] == 0xff */ "black"
+							          ) !important;"
+						>@line[j].ToString("X2")</span>
+				}
+				else
+				{
+					<span>&nbsp;&nbsp;</span>
+				}
+			}
+		</code>
+
+		// ASCII view
+		<code class="ascii-view-line">
+			@for (var j = 0; j < 16; j++)
+			{
+				if (j < line.Length)
+				{
+					var c = line[j];
+					if (c is >= 32 and <= 126)
+					{
+						@((char)c)
+					}
+					else
+					{
+						<span>.</span>
+					}
+				}
+				else
+				{
+					<span>&nbsp;</span>
+				}
+			}
+		</code>
+		<br />
+}
+
+@code {
+	[Parameter]
+	public required Bytes Bytes { get; set; }
+
+	private byte[] b => Bytes._bytes;
+}
