@@ -1,16 +1,23 @@
 ﻿@using BinPlayground.Types
 
-<p>@(b.Length) bytes</p>
+<div class="hex-and-ascii-view">
+	<div>
+		@(b.Length) bytes.
+		@if (_selectedObject.Count > 0)
+		{
+			<span>@(_selectedObject.Count) Bytes selected.</span>
+			<a href="javascript:void(0)" @onclick="UnSelect">Unselect</a>
+		}
+		| <a href="javascript:void(0)" @onclick="async () => { await Select(0, false); await Select(b.Length - 1, true); }">Select all</a>
+	</div>
 
-@for (var i = 0; i < b.Length; i += 16)
-{
+	@for (var i = 0; i < b.Length; i += 16)
+	{
 		var line = b[i..Math.Min(i + 16, b.Length)];
 
 		// Address
 		<code class="address-view-line">
-			@(
-				((ulong)i + Bytes.offset).ToString("X8")
-			)
+			@(((ulong)i + Bytes.offset).ToString("X8"))
 		</code>
 
 		// Hex view
@@ -19,8 +26,11 @@
 			{
 				if (j < line.Length)
 				{
-					<span
-						style="background-color: @(
+
+					var i1 = i;
+
+					var j1 = j;
+					<span style="background-color: @(
 												 line[j] == 0 ? "black" :
 													 line[j] < 0x40 ? "gray" :
 													 line[j] < 0x80 ? "blue" :
@@ -36,7 +46,8 @@
 													 line[j] < 0xff ? "white" :
 													 /* line[j] == 0xff */ "black"
 							          ) !important;"
-						>@line[j].ToString("X2")</span>
+					@onclick="async (e) => { await Select(i1 + j1, e.ShiftKey); }"
+					class="@((_selectedObject.Contains(i1+j1)) ? "blink" : "")">@line[j].ToString("X2")</span>
 				}
 				else
 				{
@@ -68,11 +79,100 @@
 			}
 		</code>
 		<br />
-}
+	}
+</div>
+
 
 @code {
 	[Parameter]
 	public required Bytes Bytes { get; set; }
 
 	private byte[] b => Bytes._bytes;
+
+	private List<long> _selectedObject = [];
+
+	[Parameter]
+	public Bytes? SelectedBytes
+	{
+		get
+		{
+			if (_selectedObject.Count == 0)
+				return null;
+
+			var selectedMin = _selectedObject.Min();
+			var selectedMax = _selectedObject.Max();
+
+			var range = new Range((int)selectedMin, (int)selectedMax + 1);
+			return Bytes[range];
+		}
+		set
+		{
+			// Do nothing
+		}
+	}
+
+	[Parameter]
+	public Bytes? LazySelectedBytes
+	{
+		get
+		{
+			if (_selectedObject.Count == 0)
+				return null;
+
+			var selectedMin = _selectedObject.Min();
+
+			return new Bytes(b.Skip((int)selectedMin).ToArray());
+		}
+		set
+		{
+			// Do nothing
+		}
+	}
+
+	[Parameter]
+	public EventCallback<Bytes> SelectedBytesChanged { get; set; }
+
+	[Parameter]
+	public EventCallback<Bytes> LazySelectedBytesChanged { get; set; }
+
+	private async Task Select(long address, bool isRange)
+	{
+		if (!isRange)
+		{
+			_selectedObject = [address];
+		}
+		else if (_selectedObject.Count == 0)
+		{
+			await Select(address, false);
+		}
+		else
+		{
+			var selectedMin = _selectedObject.Min();
+			var selectedMax = _selectedObject.Max();
+
+			if (address < selectedMin)
+			{
+				_selectedObject = [];
+				for (var i = address; i <= selectedMax; i++)
+					_selectedObject.Add(i);
+
+			}
+			else if (address > selectedMax)
+			{
+				_selectedObject = [];
+				for (var i = selectedMin; i <= address; i++)
+					_selectedObject.Add(i);
+			}
+		}
+
+		await SelectedBytesChanged.InvokeAsync(SelectedBytes);
+		await LazySelectedBytesChanged.InvokeAsync(LazySelectedBytes);
+	}
+
+	private async Task UnSelect()
+	{
+		_selectedObject = [];
+		await SelectedBytesChanged.InvokeAsync(SelectedBytes);
+		await LazySelectedBytesChanged.InvokeAsync(LazySelectedBytes);
+	}
 }

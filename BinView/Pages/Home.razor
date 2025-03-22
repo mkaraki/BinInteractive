@@ -29,7 +29,14 @@
 		<a href="#control" @onclick="SeekPrev">Read previous @(READ_AMOUNT)</a> |
 		<a href="#control" @onclick="SeekNext">Read next @(READ_AMOUNT)</a>
 	</div>
-	<HexAndAsciiView Bytes="_bytes" />
+	<div>
+		<HexAndAsciiView Bytes="_bytes" @bind-SelectedBytes="_selectedBytes" @bind-LazySelectedBytes="_lazySelectedBytes" />
+		<div class="utilities">
+			<BytesUtilities Bytes="_selectedBytes" />
+			<LazyBytesUtilities Bytes="_lazySelectedBytes" />
+		</div>
+		<div style="width: 0; clear: both;"></div>
+	</div>
 	<div>
 		<a href="#control" @onclick="SeekZero">Read first @(READ_AMOUNT)</a> |
 		<a href="#control" @onclick="SeekPrev">Read previous @(READ_AMOUNT)</a> |
@@ -64,6 +71,10 @@
 	private string _loadingState = "";
 
 	private ulong _fileSize = 0;
+
+	private Bytes? _selectedBytes = null;
+
+	private Bytes? _lazySelectedBytes = null;
 
 	private void FileOnChange(InputFileChangeEventArgs e)
 	{

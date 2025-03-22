@@ -1,13 +1,14 @@
 ﻿using BinPlayground.Types;
 using System;
 using System.IO;
+using System.Linq;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Global
 
 namespace BinPlayground
 {
-    public class BinPlayground(Stream file, InteractiveConfig conf)
+    public partial class BinPlayground(Stream file, InteractiveConfig conf)
     {
 #pragma warning disable IDE0051 // Remove unused private members
 #pragma warning disable IDE1006 // Naming Styles

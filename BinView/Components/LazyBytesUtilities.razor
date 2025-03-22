@@ -1,0 +1,68 @@
+﻿@using BinPlayground.Types
+
+<div>
+	@if (Bytes != null && Bytes.length != 0)
+	{
+		<dl>
+			@if (Bytes.length >= 1)
+			{
+				<dt>uint8</dt>
+				<dd>@FormatBigNumber(Bytes.uint8)</dd>
+				<dt>int8</dt>
+				<dd>@FormatBigNumber(Bytes.int8)</dd>
+			}
+			@if (Bytes.length >= 2)
+			{
+				<dt>uint16 (LE)</dt>
+				<dd>@FormatBigNumber(Bytes.uint16le)</dd>
+				<dt>uint16 (BE)</dt>
+				<dd>@FormatBigNumber(Bytes.uint16be)</dd>
+				<dt>int16 (LE)</dt>
+				<dd>@FormatBigNumber(Bytes.int16le)</dd>
+				<dt>int16 (BE)</dt>
+				<dd>@FormatBigNumber(Bytes.int16be)</dd>
+			}
+			@if (Bytes.length >= 4)
+			{
+				<dt>uint32 (LE)</dt>
+				<dd>@FormatBigNumber(Bytes.uint32le)</dd>
+				<dt>uint32 (BE)</dt>
+				<dd>@FormatBigNumber(Bytes.uint32be)</dd>
+				<dt>int32 (LE)</dt>
+				<dd>@FormatBigNumber(Bytes.int32le)</dd>
+				<dt>int32 (BE)</dt>
+				<dd>@FormatBigNumber(Bytes.int32be)</dd>
+			}
+			@if (Bytes.length >= 8)
+			{
+				<dt>uint64 (LE)</dt>
+				<dd>@FormatBigNumber(Bytes.uint64le)</dd>
+				<dt>uint64 (BE)</dt>
+				<dd>@FormatBigNumber(Bytes.uint64be)</dd>
+				<dt>int64 (LE)</dt>
+				<dd>@FormatBigNumber(Bytes.int64le)</dd>
+				<dt>int64 (BE)</dt>
+				<dd>@FormatBigNumber(Bytes.int64be)</dd>
+			}
+		</dl>
+	}
+</div>
+
+@code {
+	[Parameter]
+	public Bytes? Bytes { get; set; }
+
+	private string FormatBigNumber(long? longNumber)
+	{
+		if (longNumber == null)
+			return "null";
+		return longNumber.Value.ToString("N0");
+	}
+
+	private string FormatBigNumber(ulong? ulongNumber)
+	{
+		if (ulongNumber == null)
+			return "null";
+		return ulongNumber.Value.ToString("N0");
+	}
+}

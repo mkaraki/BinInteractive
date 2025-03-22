@@ -1,0 +1,24 @@
+﻿@using BinPlayground.Types
+
+<div>
+	@if (Bytes == null || Bytes.length == 0)
+	{
+		<p>Not selected</p>
+	}
+	else
+	{
+		<dl>
+			<dt>UTF-8</dt>
+			<dd><pre><code>@(Bytes.utf8)</code></pre></dd>
+			<dt>UTF-16</dt>
+			<dd><pre><code>@(Bytes.utf16)</code></pre></dd>
+			<dt>UTF-32</dt>
+			<dd><pre><code>@(Bytes.utf32)</code></pre></dd>
+		</dl>
+	}
+</div>
+
+@code {
+	[Parameter]
+	public Bytes? Bytes { get; set; }
+}
