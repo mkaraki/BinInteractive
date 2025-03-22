@@ -1,21 +1,21 @@
 ﻿@page "/"
-@using BinPlayground
 @using BinPlayground.Types
 @using BinView.Components
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Binary Viewer</PageTitle>
 
 <div class="loading-screen @(_loading ? "" : "hide")">
 	<p>Loading: @(_loadingState)</p>
 </div>
 <div class="@((_bytes == null) ? "" : "hide")">
-	<InputFile OnChange="FileOnChange"></InputFile><br />
+	<InputFile OnChange="FileOnChange"></InputFile>
 	<button @onclick="OpenFile">Open file</button>
 </div>
 @if (_bytes != null)
 {
 	<button @onclick="CloseFile">Close file</button>
-	<div>
+	<hr />
+	<div id="control">
 		dec <input type="number" min="0" @bind="_seekPos" />
 		hex <input type="text" @bind="SeekPosHex" />
 		<button @onclick="Seek">Seek</button>
@@ -23,7 +23,18 @@
 	<div>
 		File size: @(_fileSize)
 	</div>
+	<hr />
+	<div>
+		<a href="#control" @onclick="SeekZero">Read first @(READ_AMOUNT)</a> |
+		<a href="#control" @onclick="SeekPrev">Read previous @(READ_AMOUNT)</a> |
+		<a href="#control" @onclick="SeekNext">Read next @(READ_AMOUNT)</a>
+	</div>
 	<HexAndAsciiView Bytes="_bytes" />
+	<div>
+		<a href="#control" @onclick="SeekZero">Read first @(READ_AMOUNT)</a> |
+		<a href="#control" @onclick="SeekPrev">Read previous @(READ_AMOUNT)</a> |
+		<a href="#control" @onclick="SeekNext">Read next @(READ_AMOUNT)</a>
+	</div>
 }
 
 @code {
@@ -80,6 +91,27 @@
 	private void CloseFile()
 	{
 		_bytes = null;
+	}
+
+	private async Task SeekZero()
+	{
+		_seekPos = 0;
+		await Seek();
+	}
+
+	private async Task SeekPrev()
+	{
+		if (_seekPos < READ_AMOUNT)
+			_seekPos = 0;
+		else
+			_seekPos -= READ_AMOUNT;
+		await Seek();
+	}
+
+	private async Task SeekNext()
+	{
+		_seekPos += READ_AMOUNT;
+		await Seek();
 	}
 
 	private async Task Seek()
