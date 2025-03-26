@@ -28,9 +28,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore -c Release
     - name: Pack
-      run:
-        cd BinView
-        dotnet publish -c Release --no-build -o output
+      run: cd BinView; dotnet publish -c Release --no-build -o output
     - name: Publish
       uses: cloudflare/wrangler-action@v3
       with:
