@@ -95,6 +95,10 @@ public class Bytes(byte[] bytes, ulong offset = 0)
 
     public short? int16be => BinPlayground.int16be(_bytes);
 
+    public Half? float16le => BinPlayground.float16le(_bytes);
+
+    public Half? float16be => BinPlayground.float16be(_bytes);
+
     // ====================================
     // Utilities for 4 bytes
     // ====================================
@@ -107,6 +111,10 @@ public class Bytes(byte[] bytes, ulong offset = 0)
 
     public int? int32be => BinPlayground.int32be(_bytes);
 
+    public float? float32le => BinPlayground.float32le(_bytes);
+
+    public float? float32be => BinPlayground.float32be(_bytes);
+
     // ====================================
     // Utilities for 8 bytes
     // ====================================
@@ -118,6 +126,10 @@ public class Bytes(byte[] bytes, ulong offset = 0)
     public long? int64le => BinPlayground.int64le(_bytes);
 
     public long? int64be => BinPlayground.int64be(_bytes);
+
+    public double? float64le => BinPlayground.float64le(_bytes);
+
+    public double? float64be => BinPlayground.float64be(_bytes);
 
     // ====================================
     // End of utilities

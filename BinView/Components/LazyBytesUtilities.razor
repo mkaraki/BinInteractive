@@ -21,6 +21,10 @@
 				<dd>@FormatBigNumber(Bytes.int16le)</dd>
 				<dt>int16 (BE)</dt>
 				<dd>@FormatBigNumber(Bytes.int16be)</dd>
+				<dt>float16 (LE)</dt>
+				<dd>@Bytes.float16le</dd>
+				<dt>float16 (BE)</dt>
+				<dd>@Bytes.float16be</dd>
 			}
 			@if (Bytes.length >= 4)
 			{
@@ -32,6 +36,10 @@
 				<dd>@FormatBigNumber(Bytes.int32le)</dd>
 				<dt>int32 (BE)</dt>
 				<dd>@FormatBigNumber(Bytes.int32be)</dd>
+				<dt>float32 (LE)</dt>
+				<dd>@Bytes.float32le</dd>
+				<dt>float32 (BE)</dt>
+				<dd>@Bytes.float32be</dd>
 			}
 			@if (Bytes.length >= 8)
 			{
@@ -43,6 +51,10 @@
 				<dd>@FormatBigNumber(Bytes.int64le)</dd>
 				<dt>int64 (BE)</dt>
 				<dd>@FormatBigNumber(Bytes.int64be)</dd>
+				<dt>float64 (LE)</dt>
+				<dd>@Bytes.float64le</dd>
+				<dt>float64 (BE)</dt>
+				<dd>@Bytes.float64be</dd>
 			}
 		</dl>
 	}

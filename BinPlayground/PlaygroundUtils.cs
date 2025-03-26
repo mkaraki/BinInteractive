@@ -57,7 +57,7 @@ namespace BinPlayground
         public static ushort? uint16be(byte[] bytes)
         {
             if (bytes.Length < 2) return null;
-            return BitConverter.ToUInt16(bytes.Reverse().Take(2).ToArray());
+            return BitConverter.ToUInt16(bytes.Take(2).Reverse().ToArray());
         }
 
         public static short int16be(byte a, byte b)
@@ -68,7 +68,7 @@ namespace BinPlayground
         public static short? int16be(byte[] bytes)
         {
             if (bytes.Length < 2) return null;
-            return BitConverter.ToInt16(bytes.Reverse().Take(2).ToArray());
+            return BitConverter.ToInt16(bytes.Take(2).Reverse().ToArray());
         }
 
         public static uint uint32le(byte a, byte b, byte c, byte d)
@@ -102,7 +102,7 @@ namespace BinPlayground
         public static uint? uint32be(byte[] bytes)
         {
             if (bytes.Length < 4) return null;
-            return BitConverter.ToUInt32(bytes.Reverse().Take(4).ToArray());
+            return BitConverter.ToUInt32(bytes.Take(4).Reverse().ToArray());
         }
 
         public static int int32be(byte a, byte b, byte c, byte d)
@@ -113,7 +113,7 @@ namespace BinPlayground
         public static int? int32be(byte[] bytes)
         {
             if (bytes.Length < 4) return null;
-            return BitConverter.ToInt32(bytes.Reverse().Take(4).ToArray());
+            return BitConverter.ToInt32(bytes.Take(4).Reverse().ToArray());
         }
 
         public static ulong uint64le(byte a, byte b, byte c, byte d, byte e, byte f, byte g, byte h)
@@ -146,7 +146,7 @@ namespace BinPlayground
         public static ulong? uint64be(byte[] bytes)
         {
             if (bytes.Length < 8) return null;
-            return BitConverter.ToUInt64(bytes.Reverse().Take(8).ToArray());
+            return BitConverter.ToUInt64(bytes.Take(8).Reverse().ToArray());
         }
 
         public static long int64be(byte a, byte b, byte c, byte d, byte e, byte f, byte g, byte h)
@@ -157,7 +157,73 @@ namespace BinPlayground
         public static long? int64be(byte[] bytes)
         {
             if (bytes.Length < 8) return null;
-            return BitConverter.ToInt64(bytes.Reverse().Take(8).ToArray());
+            return BitConverter.ToInt64(bytes.Take(8).Reverse().ToArray());
+        }
+
+        public static Half float16le(byte a, byte b)
+        {
+            return float16le([a, b]) ?? (Half)0;
+        }
+
+        public static Half? float16le(byte[] bytes)
+        {
+            if (bytes.Length < 2) return null;
+            return BitConverter.ToHalf(bytes.Take(2).ToArray());
+        }
+
+        public static Half float16be(byte a, byte b)
+        {
+            return float16be([a, b]) ?? (Half)0;
+        }
+
+        public static Half? float16be(byte[] bytes)
+        {
+            if (bytes.Length < 2) return null;
+            return BitConverter.ToHalf(bytes.Take(2).Reverse().ToArray());
+        }
+
+        public static float float32le(byte a, byte b, byte c, byte d)
+        {
+            return float32le([a, b, c, d]) ?? 0;
+        }
+
+        public static float? float32le(byte[] bytes)
+        {
+            if (bytes.Length < 4) return null;
+            return BitConverter.ToSingle(bytes.Take(4).ToArray());
+        }
+
+        public static float float32be(byte a, byte b, byte c, byte d)
+        {
+            return float32be([a, b, c, d]) ?? 0;
+        }
+
+        public static float? float32be(byte[] bytes)
+        {
+            if (bytes.Length < 4) return null;
+            return BitConverter.ToSingle(bytes.Take(4).Reverse().ToArray());
+        }
+
+        public static double float64le(byte a, byte b, byte c, byte d, byte e, byte f, byte g, byte h)
+        {
+            return float64le([a, b, c, d, e, f, g, h]) ?? 0;
+        }
+
+        public static double? float64le(byte[] bytes)
+        {
+            if (bytes.Length < 8) return null;
+            return BitConverter.ToDouble(bytes.Take(8).ToArray());
+        }
+
+        public static double float64be(byte a, byte b, byte c, byte d, byte e, byte f, byte g, byte h)
+        {
+            return float64be([a, b, c, d, e, f, g, h]) ?? 0;
+        }
+
+        public static double? float64be(byte[] bytes)
+        {
+            if (bytes.Length < 8) return null;
+            return BitConverter.ToDouble(bytes.Take(8).Reverse().ToArray());
         }
 
 #pragma warning restore IDE0051 // Remove unused private members
