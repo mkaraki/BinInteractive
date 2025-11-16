@@ -1,6 +1,8 @@
-﻿using BinInteractive;
+﻿using System.Collections;
+using BinInteractive;
 using BinPlayground;
 using BinPlayground.Types;
+using BinPlayground.Types.Stencils;
 using Kokuban;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -91,6 +93,49 @@ await using (var fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.
 
                     await Console.Out.WriteLineAsync();
                     Console.ResetColor();
+                    break;
+                }
+            case IEnumerator<ulong> enumerator:
+                {
+                    try
+                    {
+                        while (enumerator.MoveNext())
+                        {
+                            var i = enumerator.Current;
+                            await Console.Out.WriteLineAsync($"0x{i:X8}");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        await Console.Out.WriteLineAsync(e.Message);
+                        Console.ResetColor();
+                    }
+                    break;
+                }
+            case IEnumerator<StencilParsedSection> enumerator:
+                {
+                    try
+                    {
+                        while (enumerator.MoveNext())
+                        {
+                            var section = enumerator.Current;
+                            await Console.Out.WriteAsync($"0x{section.Address:X8}: ");
+                            foreach (byte b in section.Data)
+                            {
+                                await Console.Out.WriteAsync($"{b:X2} ");
+                            }
+                            await Console.Out.WriteLineAsync($": {section.Description} ({section.ParsedValue})");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        await Console.Out.WriteLineAsync(e.Message);
+                        Console.ResetColor();
+                    }
                     break;
                 }
             default:

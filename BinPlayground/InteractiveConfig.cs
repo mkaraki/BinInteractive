@@ -8,6 +8,8 @@
 
         public bool ColoredHex = true;
 
+        public bool AsciiColoredHex = false;
+
         public bool OmitAsciiFromHex = false;
     }
 }

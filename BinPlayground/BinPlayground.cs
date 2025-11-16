@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace BinPlayground
 {
-    public partial class BinPlayground(Stream file, InteractiveConfig conf)
+    public partial class BinPlayground(Stream file, InteractiveConfig conf) : IReadable
     {
 #pragma warning disable IDE0051 // Remove unused private members
 #pragma warning disable IDE1006 // Naming Styles
@@ -29,7 +29,9 @@ namespace BinPlayground
             pos += offset;
         }
 
-        public Bytes read(bool absolutePos = true)
+        public Bytes read() => read(true);
+
+        public Bytes read(bool absolutePos)
         {
             ulong startPos = 0;
             if (absolutePos) startPos += (ulong)pos;
@@ -41,7 +43,9 @@ namespace BinPlayground
             return bytes;
         }
 
-        public Bytes read(int len, bool absolutePos = true)
+        public Bytes read(ulong len) => read((int)len, true);
+
+        public Bytes read(int len, bool absolutePos)
         {
             ulong startPos = 0;
             if (absolutePos) startPos += (ulong)pos;
@@ -56,6 +60,7 @@ namespace BinPlayground
             var bytes = new Bytes(buffer, startPos);
             return bytes;
         }
+        
 #pragma warning restore IDE0051 // Remove unused private members
 #pragma warning restore IDE1006 // Naming Styles
     }

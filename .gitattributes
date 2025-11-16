@@ -63,3 +63,4 @@
 #*.RTF   diff=astextplain
 
 /BinView/wwwroot/thirdparty_js/*  linguist-generated
+/BinView/wwwroot/bootstrap/css/*	linguist-generated

@@ -226,6 +226,12 @@ namespace BinPlayground
             return BitConverter.ToDouble(bytes.Take(8).Reverse().ToArray());
         }
 
+        public static string hex(long hex) => hex.ToString("X");
+
+        public static string oct(long oct) => Convert.ToString(oct, 8);
+
+        public static string bin(long bin) => Convert.ToString(bin, 2);
+
 #pragma warning restore IDE0051 // Remove unused private members
 #pragma warning restore IDE1006 // Naming Styles
     }

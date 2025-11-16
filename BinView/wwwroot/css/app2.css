@@ -1,4 +1,13 @@
-﻿.hex-view-line,
+﻿#app {
+    min-width: 960px;
+    overflow-x: auto;
+}
+
+body, #app {
+    min-height: 100%;
+}
+
+.hex-view-line,
 .address-view-line {
     display: inline-block;
     margin-right: 10px;
@@ -22,6 +31,10 @@
     color: white;
 }
 
+.loading-screen > div {
+    text-align: center;
+}
+
 .hide {
     display: none !important;
 }
@@ -37,21 +50,35 @@
 }
 
 .bitmap-view {
-    width: 160px;
-    float: left;
+    min-width: 180px;
+    width: 180px;
+    height: calc(100vh - 80px);
+    overflow-y: scroll;
     margin-right: 10px;
 }
 
 .hex-and-ascii-view {
-    width: 520px;
-    height: calc(100vh - 40px);
+    min-width: 550px;
+    width: 550px;
+    height: calc(100vh - 80px);
     overflow-y: scroll;
-    float: left;
 }
 
 .utilities {
-    float: left;
-    min-width: 250px;
-    width: calc(100vw - calc(560px + 180px));
+    min-width: 200px;
+    width: calc(100vw - calc(560px + 200px));
+    height: calc(100vh - 80px);
+    overflow-y: scroll;
     overflow-x: scroll;
 }
+
+.landing {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+    .landing > div {
+        text-align: center;
+    }

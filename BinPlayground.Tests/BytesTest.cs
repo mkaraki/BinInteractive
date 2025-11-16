@@ -1,0 +1,92 @@
+﻿using System;
+using BinPlayground.Types;
+
+namespace BinPlayground.Tests
+{
+    public class BytesTest
+    {
+        [Fact]
+        public void ReadTest()
+        {
+            var sampleBytes = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10 };
+            
+            // Check length
+            var bytes = new Bytes(sampleBytes, 0);
+            Assert.Equal(17, bytes.length);
+
+            // Read all
+            bytes = new Bytes(sampleBytes, 0);
+            var read = bytes.read();
+            Assert.Equal(new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10 }, read._bytes);
+            Assert.Equal(new byte[] {}, bytes._bytes);
+
+            // Read specific length
+            bytes = new Bytes(sampleBytes, 0);
+            read = bytes.read(5);
+            Assert.Equal(new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04 }, read._bytes);
+            Assert.Equal(new byte[] { 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10 }, bytes._bytes);
+
+            // Read beyond length
+            bytes = new Bytes(sampleBytes, 0);
+            Assert.Throws<Exception>(() =>
+            {
+                _ = bytes.read(100000);
+            });;
+        }
+
+        [Fact]
+        public void SkipTakeTest()
+        {
+            var sampleBytes = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10 };
+            
+            // Skip 0
+            var bytes = new Bytes(sampleBytes, 0);
+            var res = bytes.skip(0);
+            Assert.Equal(new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10 }, res._bytes);
+
+            // Skip 13
+            bytes = new Bytes(sampleBytes, 0);
+            res = bytes.skip(13);
+            Assert.Equal(new byte[] { 0x0d, 0x0e, 0x0f, 0x10 }, res._bytes);
+            
+            // Take 10000
+            bytes = new Bytes(sampleBytes, 0);
+            res = bytes.take(10000);
+            Assert.Equal(new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10 }, res._bytes);
+
+            // Take 0
+            bytes = new Bytes(sampleBytes, 0);
+            res = bytes.take(0);
+            Assert.Equal(new byte[] { }, res._bytes);
+
+            // Take 4
+            bytes = new Bytes(sampleBytes, 0);
+            res = bytes.take(4);
+            Assert.Equal(new byte[] { 0x00, 0x01, 0x02, 0x03 }, res._bytes);
+        }
+
+        [Fact]
+        public void EncodingTest()
+        {
+            var sampleUtf8Bytes = new byte[] { 0xE3, 0x81, 0x93, 0xE3, 0x82, 0x93, 0xE3, 0x81, 0xAB, 0xE3, 0x81, 0xA1, 0xE3, 0x81, 0xAF };
+            var sampleUtf16Bytes = new byte[] { 0x53, 0x30, 0x93, 0x30, 0x6B, 0x30, 0x61, 0x30, 0x6F, 0x30 };
+            var sampleUtf32Bytes = new byte[] { 0x53, 0x30, 0x00, 0x00, 0x93, 0x30, 0x00, 0x00, 0x6B, 0x30, 0x00, 0x00, 0x61, 0x30, 0x00, 0x00, 0x6F, 0x30, 0x00, 0x00 };
+
+            // Sample UTF-8 decoding
+            var bytes = new Bytes(sampleUtf8Bytes, 0);
+            Assert.Equal("こんにちは", bytes.utf8);
+
+            // Sample UTF-16 decoding
+            bytes = new Bytes(sampleUtf16Bytes, 0);
+            Assert.Equal("こんにちは", bytes.utf16);
+
+            // Sample UTF-16 decoding (wide endpoint)
+            bytes = new Bytes(sampleUtf16Bytes, 0);
+            Assert.Equal("こんにちは", bytes.wide);
+
+            // Sample UTF-32 decoding
+            bytes = new Bytes(sampleUtf32Bytes, 0);
+            Assert.Equal("こんにちは", bytes.utf32);
+        }
+    }
+}
