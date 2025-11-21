@@ -51,7 +51,23 @@ namespace BinInteractive
 
                     if (!interactiveConfig.OmitAsciiFromHex)
                     {
-                        await Console.Out.WriteAsync(b.ascii);
+                        switch (interactiveConfig.OverrideHexViewEncoding.ToLowerInvariant())
+                        {
+                            case "utf8":
+                                await Console.Out.WriteAsync(b.utf8);
+                                break;
+                            case "utf16":
+                            case "wide":
+                                await Console.Out.WriteAsync(b.utf16);
+                                break;
+                            case "utf32":
+                                await Console.Out.WriteAsync(b.utf32);
+                                break;
+                            case "ascii":
+                            default:
+                                await Console.Out.WriteAsync(b.ascii);
+                                break;
+                        }
                     }
                     await Console.Out.WriteLineAsync();
                 }
