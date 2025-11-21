@@ -178,6 +178,9 @@ namespace BinPlayground.Tests
             };
             var bytes = new Bytes(sampleBashByte);
             Assert.Equal("Bourne-Again shell script, ASCII text executable", bytes.magic);
+
+            // Check file method too
+            Assert.Equal("Bourne-Again shell script, ASCII text executable", bytes.file);
         }
     }
 }
