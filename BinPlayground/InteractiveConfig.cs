@@ -11,5 +11,7 @@
         public bool AsciiColoredHex = false;
 
         public bool OmitAsciiFromHex = false;
+
+        public string OverrideHexViewEncoding = "ascii";
     }
 }

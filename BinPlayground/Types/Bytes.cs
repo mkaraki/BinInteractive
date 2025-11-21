@@ -11,7 +11,7 @@ using BinPlayground.Types.Stencils;
 
 namespace BinPlayground.Types;
 
-public class Bytes(byte[] bytes, ulong offset = 0) : IReadable
+public class Bytes(byte[] bytes, ulong offset = 0) : IReadable, IEnumerable<byte>
 {
     public byte[] _bytes = bytes;
 
@@ -108,7 +108,17 @@ public class Bytes(byte[] bytes, ulong offset = 0) : IReadable
 
     public string file => magic;
 
+    public IEnumerator<byte> GetEnumerator()
+    {
+        return _bytes.AsEnumerable().GetEnumerator();
+    }
+
     public override string ToString() => $"({_bytes.LongLength}) {hex}";
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return _bytes.AsEnumerable().GetEnumerator();
+    }
 
     public Bytes this[Range range]
     {
@@ -124,6 +134,46 @@ public class Bytes(byte[] bytes, ulong offset = 0) : IReadable
     public Bytes skip(int count) => new(_bytes.Skip(count).ToArray());
 
     public Bytes take(int count) => new(_bytes.Take(count).ToArray());
+
+    public Bytes reverse() => new(_bytes.Reverse().ToArray());
+
+    public Bytes le2be(int packedEach)
+    {
+        var newSize = _bytes.LongLength;
+        if (_bytes.LongLength % packedEach != 0)
+        {
+            newSize += packedEach - (_bytes.LongLength % packedEach);
+        }
+        var newByte = new byte[newSize];
+
+        for (var i = 0; i < _bytes.Length; i += packedEach)
+        {
+            var yanked = this.skip(i).take(packedEach).padRight(packedEach).reverse()._bytes;
+            Array.Copy(yanked, 0, newByte, i, packedEach);
+        }
+
+        return new(newByte, offset);
+    }
+
+    public Bytes be2le(int packetEach) => le2be(packetEach);
+
+    public Bytes padRight(long num)
+    {
+        var destSize = Math.Max(num, _bytes.LongLength);
+
+        var paddingBytes = new byte[destSize];
+        for (var i = 0; i < destSize; i++)
+        {
+            paddingBytes[i] = 0x00;
+        }
+
+        for (var i = 0; i < _bytes.Length; i++)
+        {
+            paddingBytes[i] = _bytes[i];
+        }
+
+        return new(paddingBytes, offset);
+    }
 
     // ====================================
     // Search

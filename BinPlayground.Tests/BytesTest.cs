@@ -66,6 +66,41 @@ namespace BinPlayground.Tests
         }
 
         [Fact]
+        public void ReverseTest()
+        {
+            var sampleBytes = new byte[] { 0x01, 0x02, 0x03, 0x04 };
+            var bytes = new Bytes(sampleBytes, 0);
+            var reversed = bytes.reverse();
+            Assert.Equal(new byte[] { 0x04, 0x03, 0x02, 0x01 }, reversed._bytes);
+        }
+
+        [Fact]
+        public void Le2BeTest()
+        {
+            var sampleBytes = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06 };
+            var bytes = new Bytes(sampleBytes, 0);
+            var converted = bytes.le2be(2);
+            Assert.Equal(new byte[] { 0x02, 0x01, 0x04, 0x03, 0x06, 0x05 }, converted._bytes);
+
+            // Also test be2le here
+            var converted2 = bytes.be2le(2);
+            Assert.Equal(new byte[] { 0x02, 0x01, 0x04, 0x03, 0x06, 0x05 }, converted2._bytes);
+        }
+
+        [Fact]
+        public void Le2BeTestWithNonExactPacked()
+        {
+            var sampleBytes = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 };
+            var bytes = new Bytes(sampleBytes, 0);
+            var converted = bytes.le2be(2);
+            Assert.Equal(new byte[] { 0x02, 0x01, 0x04, 0x03, 0x06, 0x05, 0x00, 0x07 }, converted._bytes);
+
+            // Also test be2le here
+            var converted2 = bytes.be2le(2);
+            Assert.Equal(new byte[] { 0x02, 0x01, 0x04, 0x03, 0x06, 0x05, 0x00, 0x07 }, converted2._bytes);
+        }
+
+        [Fact]
         public void EncodingTest()
         {
             var sampleUtf8Bytes = new byte[] { 0xE3, 0x81, 0x93, 0xE3, 0x82, 0x93, 0xE3, 0x81, 0xAB, 0xE3, 0x81, 0xA1, 0xE3, 0x81, 0xAF };
@@ -87,6 +122,33 @@ namespace BinPlayground.Tests
             // Sample UTF-32 decoding
             bytes = new Bytes(sampleUtf32Bytes, 0);
             Assert.Equal("こんにちは", bytes.utf32);
+        }
+
+        [Fact]
+        public void TestPadRight()
+        {
+            var sampleByte = new byte[] { 0x01, 0x02 };
+            var bytes = new Bytes(sampleByte, 0);
+            var padded = bytes.padRight(5);
+            Assert.Equal(new byte[] { 0x01, 0x02, 0x00, 0x00, 0x00 }, padded._bytes);
+        }
+
+        [Fact]
+        public void TestPadRightWithSameSize()
+        {
+            var sampleByte = new byte[] { 0x01, 0x02, 0x03 }; 
+            var bytes = new Bytes(sampleByte, 0);
+            var padded = bytes.padRight(3);
+            Assert.Equal(new byte[] { 0x01, 0x02, 0x03 }, padded._bytes);
+        }
+
+        [Fact]
+        public void TestPadRightWithSmallerPadSize()
+        {
+            var sampleByte = new byte[] { 0x01, 0x02, 0x03, 0x04 };
+            var bytes = new Bytes(sampleByte, 0);
+            var padded = bytes.padRight(2);
+            Assert.Equal(new byte[] { 0x01, 0x02, 0x03, 0x04 }, padded._bytes);
         }
     }
 }
