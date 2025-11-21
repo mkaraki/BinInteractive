@@ -150,5 +150,14 @@ namespace BinPlayground.Tests
             var padded = bytes.padRight(2);
             Assert.Equal(new byte[] { 0x01, 0x02, 0x03, 0x04 }, padded._bytes);
         }
+
+        [Fact]
+        public void TestEnumerableByte()
+        {
+            var sampleByte = new byte[] { 0x01, 0x02, 0x03, 0x04 };
+            var bytes = new Bytes(sampleByte);
+            var reversed = bytes.Reverse().ToArray();
+            Assert.Equal(new byte[] { 0x04, 0x03, 0x02, 0x01 }, reversed);
+        }
     }
 }
