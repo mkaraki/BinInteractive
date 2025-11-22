@@ -1,5 +1,4 @@
-﻿using System;
-using BinPlayground.Types;
+﻿using BinPlayground.Types;
 
 namespace BinPlayground.Tests
 {
@@ -158,6 +157,29 @@ namespace BinPlayground.Tests
             var bytes = new Bytes(sampleByte);
             var reversed = bytes.Reverse().ToArray();
             Assert.Equal(new byte[] { 0x04, 0x03, 0x02, 0x01 }, reversed);
+        }
+
+        [Fact]
+        public void TestToString()
+        {
+            var sampleByte = new byte[] { 0x0A, 0x0B, 0x0C };
+            var bytes = new Bytes(sampleByte);
+            Assert.Equal("(3) 0A 0B 0C", bytes.ToString());
+        }
+
+        [Fact]
+        public void TestMagic()
+        {
+            var sampleBashByte = new byte[]
+            {
+                0x23, 0x21, 0x2F, 0x75, 0x73, 0x72, 0x2F, 0x62, 0x69, 0x6E, 0x2F, 0x65, 0x6E, 0x76, 0x20, 0x62, 0x61,
+                0x73, 0x68, 0x0A
+            };
+            var bytes = new Bytes(sampleBashByte);
+            Assert.Equal("Bourne-Again shell script, ASCII text executable", bytes.magic);
+
+            // Check file method too
+            Assert.Equal("Bourne-Again shell script, ASCII text executable", bytes.file);
         }
     }
 }
