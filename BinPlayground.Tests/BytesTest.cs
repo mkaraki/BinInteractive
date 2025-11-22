@@ -1,5 +1,4 @@
-﻿using System;
-using BinPlayground.Types;
+﻿using BinPlayground.Types;
 
 namespace BinPlayground.Tests
 {

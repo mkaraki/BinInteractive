@@ -23,5 +23,23 @@ namespace BinPlayground.Tests
             Assert.Equal(new byte[] { 0x53, 0x62, 0x53 }, bitmap.GetColor(1));
             Assert.Equal(new byte[] { 0x00, 0x00, 0x00 }, bitmap.GetColor(2));
         }
+
+        [Fact]
+        public void ReadMissingColorTest()
+        {
+            var sampleBytes = new byte[] { 0x35, 0x21 };
+            var bitmap = new BytesBitmap(sampleBytes);
+
+            Assert.Equal(1UL, bitmap.Length);
+            Assert.Equal(new byte[] { 0x35, 0x21, 0x00 }, bitmap.GetColor(0));
+        }
+
+        [Fact]
+        public void ReadOutboundPixelTest()
+        {
+            var sampleBytes = new byte[] { 0x12, 0x34, 0x56 };
+            var bitmap = new BytesBitmap(sampleBytes);
+            Assert.Equal(new byte[] { 0x00, 0x00, 0x00 }, bitmap.GetColor(1));
+        }
     }
 }

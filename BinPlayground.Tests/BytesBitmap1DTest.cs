@@ -17,5 +17,15 @@ namespace BinPlayground.Tests
             Assert.Equal(new byte[] { 0x42, 0x42, 0x42 }, bitmap1d.GetColor(2));
             Assert.Equal(new byte[] { 0x00, 0x00, 0x00 }, bitmap1d.GetColor(3));
         }
+
+        [Fact]
+        public void ColorGetWithOutboundTest()
+        {
+            var sampleBytes = new byte[] { 0x01 };
+            var bytes = new Bytes(sampleBytes);
+            var bitmap1d = bytes.bitmap1d;
+
+            Assert.Equal(new byte[] { 0x00, 0x00, 0x00 }, bitmap1d.GetColor(1));
+        }
     }
 }
