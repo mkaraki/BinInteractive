@@ -1,5 +1,7 @@
-﻿using BinPlayground;
+﻿using System.Collections;
+using BinPlayground;
 using BinPlayground.Types;
+using BinPlayground.Types.Stencils;
 using Kokuban;
 
 namespace BinInteractive
@@ -185,6 +187,81 @@ namespace BinInteractive
             }
 
             await Console.Out.WriteAsync(color.Render($"{value:X2}"));
+        }
+
+        internal static async Task PrintResult(object? ret, InteractiveConfig interactiveConfig)
+        {
+            switch (ret)
+            {
+                case null:
+                    return;
+                case Bytes bytes:
+                    await PrintBytes(bytes, interactiveConfig);
+                    break;
+                case IBytesBitmap bitmap:
+                {
+                    for (ulong i = 0; i < bitmap.Length; i++)
+                    {
+                        if (interactiveConfig.BitmapWidth > 0 && i % (uint)interactiveConfig.BitmapWidth == 0)
+                        {
+                            Console.ResetColor();
+                            await Console.Out.WriteLineAsync();
+                        }
+
+                        var color = bitmap.GetColor(i);
+                        var bgRgb = Chalk.BgRgb(color[0], color[1], color[2]);
+                        await Console.Out.WriteAsync(bgRgb.Render(" "));
+                        Console.ResetColor();
+                    }
+
+                    await Console.Out.WriteLineAsync();
+                    Console.ResetColor();
+                    break;
+                }
+                case IEnumerator enumerator:
+                {
+                    try
+                    {
+                        while (enumerator.MoveNext())
+                        {
+                            await PrintResult(enumerator.Current, interactiveConfig);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        await Console.Out.WriteLineAsync(e.Message);
+                        Console.ResetColor();
+                    }
+                    break;
+                }
+                case ulong i:
+                {
+                    await Console.Out.WriteLineAsync($"0x{i:X8}");
+                    break;
+                }
+                case StencilParsedSection section:
+                {
+                    await Console.Out.WriteAsync($"0x{section.Address:X8}: ");
+                    foreach (byte b in section.Data)
+                    {
+                        await Console.Out.WriteAsync($"{b:X2} ");
+                    }
+                    await Console.Out.WriteLineAsync($": {section.Description} ({section.ParsedValue})");
+                    break;
+                }
+                default:
+                {
+                    var retStr = ret.ToString();
+                    if (!string.IsNullOrEmpty(retStr))
+                    {
+                        await Console.Out.WriteLineAsync(retStr);
+                    }
+                    break;
+                }
+            }
+            
         }
     }
 }
