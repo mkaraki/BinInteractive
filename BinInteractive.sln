@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.0.11205.157 d18.0
+VisualStudioVersion = 18.0.11205.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinInteractive", "BinInteractive\BinInteractive.csproj", "{13C3EA36-941F-43F7-A37D-03EDD4EDEAA4}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinView", "BinView\BinView.csproj", "{DCAAA006-0079-4D88-A4E1-0778E3D6C7E6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinPlayground.Tests", "BinPlayground.Tests\BinPlayground.Tests.csproj", "{666917C9-0B19-4BFC-9729-40DF5628FF6F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinView.Tests", "BinView.Tests\BinView.Tests.csproj", "{63AE416B-F753-1A54-08C4-0A2414262EFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{666917C9-0B19-4BFC-9729-40DF5628FF6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{666917C9-0B19-4BFC-9729-40DF5628FF6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{666917C9-0B19-4BFC-9729-40DF5628FF6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63AE416B-F753-1A54-08C4-0A2414262EFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63AE416B-F753-1A54-08C4-0A2414262EFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63AE416B-F753-1A54-08C4-0A2414262EFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63AE416B-F753-1A54-08C4-0A2414262EFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
