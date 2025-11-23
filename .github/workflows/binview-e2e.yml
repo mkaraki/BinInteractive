@@ -29,15 +29,11 @@ jobs:
         run: pwsh bin/Debug/net10.0/playwright.ps1 install --with-deps
         working-directory: BinView.Tests
 
-      - name: Run WASM server
-        run: dotnet run --no-build &
-        working-directory: BinView.Tests
-
-      - name: Wait for webserver
-        run: npx wait-on http://localhost:5163/
-
       - name: Test
-        run: dotnet test --no-build --verbosity normal --logger "junit;LogFilePath=./TestResults/junit.xml"
+        run: |
+          dotnet run --no-build &
+          npx wait-on http://localhost:5163/
+          dotnet test --no-build --verbosity normal --logger "junit;LogFilePath=./TestResults/junit.xml"
         working-directory: BinView.Tests
 
       - name: Upload test results to Codecov
