@@ -159,9 +159,9 @@
 		var data = new List<Bytes> { };
 		for (int i = 0; i < yanked._bytes.Length; i += 16)
 		{
-			var offset = (int)yanked.offset + i;
+			var offset = yanked.offset + (ulong)i;
 			var range = yanked.skip(i /* Skip internal amount */).take(16);
-			data.Add(new Bytes(range._bytes, (ulong)offset));
+			data.Add(new Bytes(range._bytes, offset));
 		}
 
 		return new ItemsProviderResult<Bytes>(data, totalSize);
