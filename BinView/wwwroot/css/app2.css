@@ -58,14 +58,15 @@ body, #app {
 }
 
 .hex-and-ascii-view {
-    min-width: 550px;
-    width: 550px;
+    min-width: 560px;
+    width: 560px;
     height: calc(100vh - 80px);
     overflow-y: scroll;
 }
 
 .utilities {
     min-width: 200px;
+    max-width: 560px;
     width: calc(100vw - calc(560px + 200px));
     height: calc(100vh - 80px);
     overflow-y: scroll;
