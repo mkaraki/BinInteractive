@@ -12,7 +12,7 @@
 		<p>@(_loadingState)</p>
 	</div>
 </div>
-<div class="@((_bytes == null) ? "" : "hide") landing">
+<div class="@((!_isFileLoaded) ? "" : "hide") landing">
 	<div class="container">
 		<h1>Online Binary Viewer</h1>
 		<div class="mb-3">
@@ -32,7 +32,7 @@
 		</div>
 	</div>
 </div>
-@if (_bytes != null)
+@if (_isFileLoaded)
 {
 	<div class="container">
 		<div class="row mb-3 mt-3">
@@ -41,70 +41,110 @@
 				<button @onclick="CloseFile" class="btn btn-danger btn-sm" type="button">Close file</button>
 			</div>
 		</div>
-		<div class="row" id="control">
-			<div class="col-auto">Position:</div>
-			<div class="col-auto">
-				<label for="position-dec">dec</label>
-			</div>
-			<div class="col-auto">
-				<input type="number" min="0" @bind="_seekPos" class="form-control form-control-sm" id="position-dec" />
-			</div>
-			<div class="col-auto">
-				<label for="position-hex">hex</label>
-			</div>
-			<div class="col-auto">
-				<input type="text" class="form-control form-control-sm" id="position-hex" @bind="SeekPosHex" />
-			</div>
-			<div class="col-auto">
-				<button type="button" class="btn btn-primary btn-sm" @onclick="Seek">Seek</button>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col">
-				<ul class="nav justify-content-center">
-					<li class="nav-item">
-						<a href="#control" class="nav-link" @onclick="SeekZero">Read first @(READ_AMOUNT)</a>
-					</li>
-					<li class="nav-item">
-						<a href="#control" class="nav-link" @onclick="SeekPrev">Read previous @(READ_AMOUNT)</a>
-					</li>
-					<li class="nav-item">
-						<a href="#control" class="nav-link" @onclick="SeekNext">Read next @(READ_AMOUNT)</a>
-					</li>
-				</ul>
-
-			</div>
-		</div>
 	</div>
-	<div class="container-xl">
+	<div class="container-fluid">
 		<div class="row">
 			<div class="col">
 				<div class="d-flex justify-content-center">
-					<BitmapView Bytes="_bytes" @ref="_bitmapViewComponent"></BitmapView>
-					<HexAndAsciiView Bytes="_bytes" @bind-SelectedBytes="_selectedBytes" @bind-LazySelectedBytes="_lazySelectedBytes" />
+					<div class="bitmap-view">
+						<Virtualize Context="bitmapLine" ItemsProvider="LoadBitmapLine" OverscanCount="25">
+							<ItemContent>
+								<BitmapLineView Bytes="bitmapLine"></BitmapLineView>
+							</ItemContent>
+							<Placeholder>
+								Loading...
+							</Placeholder>
+						</Virtualize>
+					</div>
+					<div class="hex-and-ascii-view">
+						<Virtualize Context="binLine" ItemsProvider="LoadBinLine" OverscanCount="25">
+							<ItemContent>
+								<code class="address-view-line">
+									@((binLine.offset).ToString("X8"))
+								</code>
+
+								<code class="hex-view-line">
+									@for (var i = 0; i < 16; i++)
+									{
+										if (i < binLine.length)
+										{
+											var addr = (long)binLine.offset + i;
+											var v = binLine._bytes[i];
+											<span style="background-color: @(
+											                               v == 0 ? "black" :
+											                               v < 0x40 ? "gray" :
+											                               v < 0x80 ? "blue" :
+											                               v < 0xc0 ? "yellow" :
+											                               v < 0xff ? "red" :
+											                               /* line[j] == 0xff */ "white"
+											                               ) !important;
+											         color: @(
+											                v == 0 ? "gray" :
+											                v < 0x40 ? "white" :
+											                v < 0x80 ? "white" :
+											                v < 0xc0 ? "black" :
+											                v < 0xff ? "white" :
+											                /* line[j] == 0xff */ "black"
+											                ) !important;"
+											      @onclick="async (e) => { await Select(addr, e.ShiftKey); }"
+											      class="@((_selectedObject.Contains(addr)) ? "blink" : "")">
+												@v.ToString("X2")
+											</span>
+										}
+										else
+										{
+											<span>&nbsp;&nbsp;</span>
+										}
+									}
+								</code>
+
+								<code class="ascii-view-line">
+									@for (var j = 0; j < 16; j++)
+									{
+										if (j < binLine.length)
+										{
+											var c = binLine._bytes[j];
+											if (c is >= 32 and <= 126)
+											{
+												@((char)c)
+											}
+											else
+											{
+												<span>.</span>
+											}
+										}
+										else
+										{
+											<span>&nbsp;</span>
+										}
+									}
+								</code>
+								<br/>
+							</ItemContent>
+							<Placeholder>
+								<code class="address-view-line">
+									LOADING&nbsp;
+								</code>
+								<code class="hex-view-line">
+									@for (var i = 0; i < 16; i++)
+									{
+										<span style="background-color: dimgray; color: white;">??</span>
+									}
+								</code>
+								<code class="ascii-view-line">
+									@foreach (var c in "LOADING LOADING ")
+									{
+										<span>@c</span>
+									}
+								</code>
+							</Placeholder>
+						</Virtualize>
+					</div>
 					<div class="utilities">
-						<BytesUtilities Bytes="_selectedBytes" />
-						<LazyBytesUtilities Bytes="_lazySelectedBytes" />
+						<BytesUtilities Bytes="_selectedBytes"/>
+						<LazyBytesUtilities Bytes="_lazySelectedBytes"/>
 					</div>
 				</div>
-
-			</div>
-		</div>
-	</div>
-	<div class="container">
-		<div class="row">
-			<div class="col">
-				<ul class="nav justify-content-center">
-					<li class="nav-item">
-						<a href="#control" class="nav-link" @onclick="SeekZero">Read first @(READ_AMOUNT)</a>
-					</li>
-					<li class="nav-item">
-						<a href="#control" class="nav-link" @onclick="SeekPrev">Read previous @(READ_AMOUNT)</a>
-					</li>
-					<li class="nav-item">
-						<a href="#control" class="nav-link" @onclick="SeekNext">Read next @(READ_AMOUNT)</a>
-					</li>
-				</ul>
 			</div>
 		</div>
 	</div>
@@ -112,27 +152,61 @@
 
 @code {
 
-	private BitmapView _bitmapViewComponent = new();
+	private async ValueTask<ItemsProviderResult<Bytes>> LoadBitmapLine(ItemsProviderRequest request)
+	{
+		var startByte = request.StartIndex * 96 /* 32 width * 3 byte for each pixel */;
+		var length = request.Count * 96;
+		
+		var totalSize = (int)Math.Ceiling((float)_fileSize / 96.0);
+		
+		var yanked = await ReadRange(startByte, length);
+		if (yanked == null)
+		{
+			return new ItemsProviderResult<Bytes>([], totalSize);
+		}
 
-	private const long READ_AMOUNT = 0x2000;
+		var data = new List<Bytes> { };
+		for (int i = 0; i < yanked._bytes.Length; i += 96)
+		{
+			var offset = yanked.offset + (ulong)i;
+			var range = yanked.skip(i /* Skip internal amount */).take(96);
+			data.Add(new Bytes(range._bytes, offset));
+		}
+		
+		return new ItemsProviderResult<Bytes>(data, totalSize);
+	}
+	
+	private async ValueTask<ItemsProviderResult<Bytes>> LoadBinLine(ItemsProviderRequest request)
+	{
+		var startByte = request.StartIndex * 16;
+		var length = request.Count * 16;
+
+		var totalSize = (int)Math.Ceiling((float)_fileSize / 16.0);
+
+		Console.WriteLine("LoadBinLine->Read(0x{0:X}, 0x{1:X})", startByte, length);
+		
+		var yanked = await ReadRange(startByte, length);
+		if (yanked == null)
+		{
+			return new ItemsProviderResult<Bytes>([], totalSize);
+		}
+
+		var data = new List<Bytes> { };
+		for (int i = 0; i < yanked._bytes.Length; i += 16)
+		{
+			var offset = yanked.offset + (ulong)i;
+			var range = yanked.skip(i /* Skip internal amount */).take(16);
+			data.Add(new Bytes(range._bytes, offset));
+		}
+
+		return new ItemsProviderResult<Bytes>(data, totalSize);
+	}
 
 	private const long UNSEEN_READ_AMOUNT = 0x10000;
 
+	private const long LAZY_READ_AMOUNT = 16; /* MAX 64-bit item, 16 bytes. */
+
 	private IBrowserFile? _selectedFile = null;
-
-	private Bytes? _bytes = null;
-
-	private ulong _seekPos = 0;
-
-	private string SeekPosHex
-	{
-		get => _seekPos.ToString("X");
-		set
-		{
-			if (ulong.TryParse(value, System.Globalization.NumberStyles.HexNumber, null, out var v))
-				_seekPos = v;
-		}
-	}
 
 	private bool _loading = false;
 
@@ -144,6 +218,44 @@
 
 	private Bytes? _lazySelectedBytes = null;
 
+	private bool _isFileLoaded = false;
+
+	private List<long> _selectedObject = [];
+	private async Task Select(long address, bool isRange)
+	{
+		if (!isRange)
+		{
+			_selectedObject = [address];
+		}
+		else if (_selectedObject.Count == 0)
+		{
+			await Select(address, false);
+		}
+		else
+		{
+			var selectedMin = _selectedObject.Min();
+			var selectedMax = _selectedObject.Max();
+
+			if (address < selectedMin)
+			{
+				_selectedObject = [];
+				for (var i = address; i <= selectedMax; i++)
+					_selectedObject.Add(i);
+
+			}
+			else if (address > selectedMax)
+			{
+				_selectedObject = [];
+				for (var i = selectedMin; i <= address; i++)
+					_selectedObject.Add(i);
+			}
+		}
+		
+		// Apply selection
+		_selectedBytes = await ReadRange(_selectedObject.Min(), _selectedObject.Count());
+		_lazySelectedBytes = await ReadRange(_selectedObject.Min(), LAZY_READ_AMOUNT);
+	}
+	
 	private void FileOnChange(InputFileChangeEventArgs e)
 	{
 		try
@@ -159,91 +271,55 @@
 	private async Task OpenFile()
 	{
 		if (_selectedFile == null) return;
-
 		_loading = true;
-
-		await Seek(0);
-
+		// Test Read
+		await ReadRange(0, 1);
 		_loading = false;
+		_isFileLoaded = true;
 	}
 
 	private void CloseFile()
 	{
-		_bytes = null;
+		_selectedFile = null;
+		_isFileLoaded = false;
 	}
 
-	private async Task SeekZero()
-	{
-		_seekPos = 0;
-		await Seek();
-	}
-
-	private async Task SeekPrev()
-	{
-		if (_seekPos < READ_AMOUNT)
-			_seekPos = 0;
-		else
-			_seekPos -= READ_AMOUNT;
-		await Seek();
-	}
-
-	private async Task SeekNext()
-	{
-		_seekPos += READ_AMOUNT;
-		await Seek();
-	}
-
-	private async Task Seek()
-	{
-		_loading = true;
-		_loadingState = "Seek...";
-
-		await Seek((long)_seekPos);
-
-		_loading = false;
-	}
-
-	private async Task Seek(long pos)
+	private async Task<Bytes?> ReadRange(long pos, long length)
 	{
 		if (_selectedFile == null)
-			return;
+			return null;
 
 		await using (var rs = _selectedFile.OpenReadStream(maxAllowedSize: long.MaxValue))
 		{
 			_fileSize = (ulong)rs.Length;
-
-
+			
 			if (rs.Length == 0)
 			{
-				return;
+				return null;
 			}
 			if (pos >= rs.Length)
 			{
 				pos = rs.Length - 1;
-				_seekPos = (ulong)rs.Length - 1;
 			}
 
 			_loadingState = "seeking file stream to position";
 			await Seek(rs, pos);
 
-			var readAmount = Math.Min(READ_AMOUNT, Math.Max(0, rs.Length - pos));
-			Console.WriteLine($"Reading {readAmount}");
+			var readAmount = Math.Min(length, Math.Max(0, rs.Length - pos));
 			var buffer = new byte[readAmount];
 			_loadingState = "Reading file stream to buffer";
+			Console.WriteLine("ReadFromFile, Current: 0x{0:X}, Length: 0x{1:X}", rs.Position, buffer.Length);
 			await rs.ReadExactlyAsync(buffer, 0, buffer.Length);
 
-			_bytes = new Bytes(buffer, (ulong)pos);
+			return new Bytes(buffer, (ulong)pos);
 		}
-
-		_loadingState = "Generating bitmap";
-		_bitmapViewComponent.Bytes = _bytes;
-		await _bitmapViewComponent.Update();
 	}
 
 	private async Task Seek(Stream stream, long pos)
 	{
+		// stream.Position not supported on Blazor WebAssembly
 		//stream.Position = 0;
-
+		
 		ulong seekNum = 0;
 
 		while (stream.Position != pos)
@@ -253,6 +329,10 @@
 			_loadingState = $"Seeking {seekAmount} bytes... {++seekNum}";
 
 			var buffer = new byte[seekAmount];
+			
+			Console.WriteLine($"Seeking 0x{seekAmount:X} bytes... {seekNum}");
+			
+			// Do seek virtually
 			await stream.ReadExactlyAsync(buffer, 0, buffer.Length);
 		}
 	}

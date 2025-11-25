@@ -1,0 +1,62 @@
+﻿@using BinPlayground.Types
+@using Blazor.Extensions
+@using Blazor.Extensions.Canvas
+@using Blazor.Extensions.Canvas.Canvas2D
+
+<div title="0x@(Bytes.offset.ToString("X")) ~ 0x@((Bytes.offset + 96).ToString("X"))">
+	<BECanvas Width="@_bitmapWidth" Height="BIT_SIZE" @ref="CanvasReference" />
+</div>
+
+@code {
+	private Canvas2DContext? _context;
+
+	protected BECanvasComponent? CanvasReference;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		_context = await CanvasReference.CreateCanvas2DAsync();
+
+		await Update();
+	}
+
+	private const int BIT_WIDTH = 32;
+
+	private const int BIT_SIZE = 5;
+
+	private readonly int _bitmapWidth = BIT_WIDTH * BIT_SIZE;
+
+	[Parameter]
+    public Bytes Bytes { get; set; }
+
+	private BytesBitmap Bitmap => Bytes.bitmap;
+
+	public async Task Update()
+	{
+		if (Bitmap == null || _context == null || CanvasReference == null)
+			return;
+
+		var totalLength = Bitmap.Length;
+
+		await _context.BeginBatchAsync();
+
+		await _context.ClearRectAsync(0, 0, CanvasReference.Width, CanvasReference.Height);
+
+		for (ulong w = 0; w < totalLength; w++)
+		{
+			if (w >= totalLength)
+			{
+				break;
+			}
+
+			var color = Bitmap.GetColor(w);
+			var colorString = $"rgb({color[0]} {color[1]} {color[2]})";
+
+			var x = w * BIT_SIZE;
+
+			await _context.SetFillStyleAsync(colorString);
+			await _context.FillRectAsync(x, 0, BIT_SIZE, BIT_SIZE);
+		}
+
+		await _context.EndBatchAsync();
+	}
+}
