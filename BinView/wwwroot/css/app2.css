@@ -55,6 +55,13 @@ body, #app {
     height: calc(100vh - 80px);
     overflow-y: scroll;
     margin-right: 10px;
+    
+    canvas {
+        display: block;
+        margin: 0;
+        padding: 0;
+        height: 5px;
+    }
 }
 
 .hex-and-ascii-view {

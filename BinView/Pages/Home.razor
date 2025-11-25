@@ -46,6 +46,16 @@
 		<div class="row">
 			<div class="col">
 				<div class="d-flex justify-content-center">
+					<div class="bitmap-view">
+						<Virtualize Context="bitmapLine" ItemsProvider="LoadBitmapLine" OverscanCount="25">
+							<ItemContent>
+								<BitmapLineView Bytes="bitmapLine"></BitmapLineView>
+							</ItemContent>
+							<Placeholder>
+								Loading...
+							</Placeholder>
+						</Virtualize>
+					</div>
 					<div class="hex-and-ascii-view">
 						<Virtualize Context="binLine" ItemsProvider="LoadBinLine" OverscanCount="25">
 							<ItemContent>
@@ -109,7 +119,7 @@
 										}
 									}
 								</code>
-								<br />
+								<br/>
 							</ItemContent>
 							<Placeholder>
 								<code class="address-view-line">
@@ -118,7 +128,7 @@
 								<code class="hex-view-line">
 									@for (var i = 0; i < 16; i++)
 									{
-										<span style="background-color: dimgray; color: white;" >??</span>
+										<span style="background-color: dimgray; color: white;">??</span>
 									}
 								</code>
 								<code class="ascii-view-line">
@@ -131,8 +141,8 @@
 						</Virtualize>
 					</div>
 					<div class="utilities">
-						<BytesUtilities Bytes="_selectedBytes" />
-						<LazyBytesUtilities Bytes="_lazySelectedBytes" />
+						<BytesUtilities Bytes="_selectedBytes"/>
+						<LazyBytesUtilities Bytes="_lazySelectedBytes"/>
 					</div>
 				</div>
 			</div>
@@ -141,6 +151,31 @@
 }
 
 @code {
+
+	private async ValueTask<ItemsProviderResult<Bytes>> LoadBitmapLine(ItemsProviderRequest request)
+	{
+		var startByte = request.StartIndex * 96 /* 32 width * 3 byte for each pixel */;
+		var length = request.Count * 96;
+		
+		var totalSize = (int)Math.Ceiling((float)_fileSize / 96.0);
+		
+		var yanked = await ReadRange(startByte, length);
+		if (yanked == null)
+		{
+			return new ItemsProviderResult<Bytes>([], totalSize);
+		}
+
+		var data = new List<Bytes> { };
+		for (int i = 0; i < yanked._bytes.Length; i += 96)
+		{
+			var offset = yanked.offset + (ulong)i;
+			var range = yanked.skip(i /* Skip internal amount */).take(96);
+			data.Add(new Bytes(range._bytes, offset));
+		}
+		
+		return new ItemsProviderResult<Bytes>(data, totalSize);
+	}
+	
 	private async ValueTask<ItemsProviderResult<Bytes>> LoadBinLine(ItemsProviderRequest request)
 	{
 		var startByte = request.StartIndex * 16;
@@ -167,11 +202,9 @@
 		return new ItemsProviderResult<Bytes>(data, totalSize);
 	}
 
-	private BitmapView _bitmapViewComponent = new();
-
 	private const long UNSEEN_READ_AMOUNT = 0x10000;
 
-	private const long LAZY_READ_AMOUNT = 16; /* MAX 64-bit item. */
+	private const long LAZY_READ_AMOUNT = 16; /* MAX 64-bit item, 16 bytes. */
 
 	private IBrowserFile? _selectedFile = null;
 
