@@ -11,6 +11,10 @@ updates:
       interval: "monthly"
     assignees:
       - mkaraki
+    groups:
+      nuget-all:
+        patterns:
+          - "*"
 
   - package-ecosystem: github-actions # See documentation for possible values
     directory: "/" # Location of package manifests
@@ -18,3 +22,7 @@ updates:
       interval: "monthly"
     assignees:
       - mkaraki
+    groups:
+      actions-all:
+        patterns:
+          - "*"
