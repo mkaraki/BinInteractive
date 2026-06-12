@@ -6,12 +6,17 @@
 
         public int HexWidth = 16;
 
-        public bool ColoredHex = true;
-
-        public bool AsciiColoredHex = false;
+        public ColoredHex ColoredHex = ColoredHex.Normal;
 
         public bool OmitAsciiFromHex = false;
 
         public string OverrideHexViewEncoding = "ascii";
+    }
+
+    public enum ColoredHex
+    {
+        Normal,
+        Ascii,
+        Disabled,
     }
 }

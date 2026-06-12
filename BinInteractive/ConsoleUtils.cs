@@ -15,7 +15,7 @@ namespace BinInteractive
                 await Console.Out.WriteLineAsync(bytes.ToString());
                 return;
             }
-            if (interactiveConfig.ColoredHex)
+            if (interactiveConfig.ColoredHex != ColoredHex.Disabled)
             {
                 await PrintColoredHexLegendAsync(interactiveConfig);
             }
@@ -33,7 +33,7 @@ namespace BinInteractive
                 }
 
                 var value = bytes.byteArray[i];
-                if (interactiveConfig.ColoredHex)
+                if (interactiveConfig.ColoredHex != ColoredHex.Disabled)
                 {
                     Console.ResetColor();
                     await Console.Out.WriteAsync(" ");
@@ -88,7 +88,7 @@ namespace BinInteractive
             await Console.Out.WriteAsync("  ");
 
 
-            if (interactiveConfig.AsciiColoredHex)
+            if (interactiveConfig.ColoredHex == ColoredHex.Ascii)
             {
                 await PrintColoredHexAsync(0x01, interactiveConfig);
                 await Console.Out.WriteAsync("~");
@@ -159,16 +159,20 @@ namespace BinInteractive
         {
             var color = Chalk.BgBlack.White;
 
-            if (interactiveConfig is { AsciiColoredHex: true })
+            if (interactiveConfig is { ColoredHex: ColoredHex.Ascii })
             {
-                if (value == 0)
-                    color = Chalk.BgBlack.Gray;
-                else if (value < 0x20 || value == 0x7f) /* Controls */
-                    color = Chalk.BgGray.White;
-                else if (value < 0x7f) /* ASCII Range */
-                    color = Chalk.BgBlue.White;
-                else /* value >= 0x80 */
+                if (value < 0x20 || value == 0x7f) // Control characters and DEL
                     color = Chalk.BgWhite.Black;
+                else if (value >= 0x80) // Non-ASCII
+                    color = Chalk.BgRed.White;
+                else if (value >= 0x30 && value <= 0x39) // Numbers
+                    color = Chalk.BgBlue.White;
+                else if (value >= 0x41 && value <= 0x5A) // Uppercase letters
+                    color = Chalk.BgYellow.Black;
+                else if (value >= 0x61 && value <= 0x7A) // Lowercase letters
+                    color = Chalk.BgGreen.White;
+                else // Special characters
+                    color = Chalk.BgGray.White;
             }
             else
             {

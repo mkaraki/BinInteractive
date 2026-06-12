@@ -87,6 +87,11 @@ body, #app {
     height: 100vh;
 }
 
-    .landing > div {
-        text-align: center;
-    }
+.landing > div {
+    text-align: center;
+}
+
+ul.nav.justify-content-center>li.nav-item {
+    display: block;
+    margin: 0 0.5em;
+}

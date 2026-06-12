@@ -1,0 +1,59 @@
+﻿@page "/settings"
+@using BinView.Components
+
+<PageTitle>Settings - BinView</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h1>BinView Settings</h1>
+            <hr />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="mb-3">
+                <label for="cfg-highlight-mode" class="form-label">Highlight Mode</label>
+                <select class="form-select" aria-label="Default select example" @bind="_highlightMode">
+                    <option value="normal">Default</option>
+                    <option value="ascii">ASCII</option>
+                </select>
+            </div>
+            <button type="button" class="btn btn-primary" @onclick="SaveSettings">Save</button>
+            You need to reload this application to apply configuration.
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <hr />
+	        <FooterMenuBar />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject]
+    private IJSRuntime JSRuntime { get; set; }
+
+    private string _highlightMode;
+
+    protected override void OnInitialized()
+    {
+        BinViewConfig.Init(JSRuntime);
+
+        _highlightMode = BinViewConfig.GetHighlightModeText();
+    }
+
+    private async Task SaveSettings()
+    {
+        //BinViewConfig._jsRuntime = JSRuntime;
+
+        BinViewConfig.SetHighlightModeText(_highlightMode);
+
+        BinViewConfig.SaveConfig();
+
+        await JSRuntime.InvokeVoidAsync("alert", "Settings saved successfully. Please reload the application to apply changes.");
+    }
+}

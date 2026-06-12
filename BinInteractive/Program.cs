@@ -51,7 +51,10 @@ await using (var fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.
             {
                 var scriptOption = ScriptOptions.Default
                     .WithImports("System", "System.IO", "System.Text", "BinPlayground.Types")
-                    .WithReferences(typeof(FileStream).Assembly, typeof(ByteArrayExtensions).Assembly);
+                    .WithReferences(
+                        typeof(FileStream).Assembly,
+                        typeof(ByteArrayExtensions).Assembly
+                    );
                 var scr = CSharpScript.Create(command, globalsType: typeof(BinPlayground.BinPlayground), options: scriptOption);
                 res = await scr.RunAsync(playground);
             }

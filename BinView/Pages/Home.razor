@@ -24,11 +24,7 @@
 		</div>
 		<hr />
 		<div>
-			<ul class="nav justify-content-center">
-				<li class="nav-item">
-					<a href="https://github.com/mkaraki/BinInteractive">Source code</a>
-				</li>
-			</ul>
+			<FooterMenuBar />
 		</div>
 	</div>
 </div>
@@ -70,22 +66,8 @@
 										{
 											var addr = (long)binLine.offset + i;
 											var v = binLine._bytes[i];
-											<span style="background-color: @(
-											                               v == 0 ? "black" :
-											                               v < 0x40 ? "gray" :
-											                               v < 0x80 ? "blue" :
-											                               v < 0xc0 ? "yellow" :
-											                               v < 0xff ? "red" :
-											                               /* line[j] == 0xff */ "white"
-											                               ) !important;
-											         color: @(
-											                v == 0 ? "gray" :
-											                v < 0x40 ? "white" :
-											                v < 0x80 ? "white" :
-											                v < 0xc0 ? "black" :
-											                v < 0xff ? "white" :
-											                /* line[j] == 0xff */ "black"
-											                ) !important;"
+											<span style="background-color: @GetHexBackgroundColor(v) !important;
+											         color: @GetHexForegroundColor(v) !important;"
 											      @onclick="async (e) => { await Select(addr, e.ShiftKey); }"
 											      class="@((_selectedObject.Contains(addr)) ? "blink" : "")">
 												@v.ToString("X2")
@@ -103,18 +85,20 @@
 									{
 										if (j < binLine.length)
 										{
+											var addr = (long)binLine.offset + j;
 											var c = binLine._bytes[j];
 											if (c is >= 32 and <= 126)
 											{
-												@((char)c)
+												<span class="@((_selectedObject.Contains(addr)) ? "blink" : "")">@((char)c)</span>
 											}
 											else
 											{
-												<span>.</span>
+												<span class="@((_selectedObject.Contains(addr)) ? "blink" : "")">.</span>
 											}
 										}
 										else
 										{
+											<!-- After EOF -->
 											<span>&nbsp;</span>
 										}
 									}
@@ -151,14 +135,21 @@
 }
 
 @code {
+		[Inject]
+		public required IJSRuntime JSRuntime { get; set; }
+
+	protected override void OnInitialized()
+	{
+		BinViewConfig.Init(JSRuntime);
+	}
 
 	private async ValueTask<ItemsProviderResult<Bytes>> LoadBitmapLine(ItemsProviderRequest request)
 	{
 		var startByte = request.StartIndex * 96 /* 32 width * 3 byte for each pixel */;
 		var length = request.Count * 96;
-		
+
 		var totalSize = (int)Math.Ceiling((float)_fileSize / 96.0);
-		
+
 		var yanked = await ReadRange(startByte, length);
 		if (yanked == null)
 		{
@@ -172,10 +163,10 @@
 			var range = yanked.skip(i /* Skip internal amount */).take(96);
 			data.Add(new Bytes(range._bytes, offset));
 		}
-		
+
 		return new ItemsProviderResult<Bytes>(data, totalSize);
 	}
-	
+
 	private async ValueTask<ItemsProviderResult<Bytes>> LoadBinLine(ItemsProviderRequest request)
 	{
 		var startByte = request.StartIndex * 16;
@@ -184,7 +175,7 @@
 		var totalSize = (int)Math.Ceiling((float)_fileSize / 16.0);
 
 		Console.WriteLine("LoadBinLine->Read(0x{0:X}, 0x{1:X})", startByte, length);
-		
+
 		var yanked = await ReadRange(startByte, length);
 		if (yanked == null)
 		{
@@ -250,12 +241,12 @@
 					_selectedObject.Add(i);
 			}
 		}
-		
+
 		// Apply selection
 		_selectedBytes = await ReadRange(_selectedObject.Min(), _selectedObject.Count());
 		_lazySelectedBytes = await ReadRange(_selectedObject.Min(), LAZY_READ_AMOUNT);
 	}
-	
+
 	private void FileOnChange(InputFileChangeEventArgs e)
 	{
 		try
@@ -292,7 +283,7 @@
 		await using (var rs = _selectedFile.OpenReadStream(maxAllowedSize: long.MaxValue))
 		{
 			_fileSize = (ulong)rs.Length;
-			
+
 			if (rs.Length == 0)
 			{
 				return null;
@@ -319,7 +310,7 @@
 	{
 		// stream.Position not supported on Blazor WebAssembly
 		//stream.Position = 0;
-		
+
 		ulong seekNum = 0;
 
 		while (stream.Position != pos)
@@ -329,12 +320,95 @@
 			_loadingState = $"Seeking {seekAmount} bytes... {++seekNum}";
 
 			var buffer = new byte[seekAmount];
-			
+
 			Console.WriteLine($"Seeking 0x{seekAmount:X} bytes... {seekNum}");
-			
+
 			// Do seek virtually
 			await stream.ReadExactlyAsync(buffer, 0, buffer.Length);
 		}
 	}
 
+	private string GetHexForegroundColor(byte v)
+	{
+		switch (BinViewConfig.HighlightMode)
+		{
+			case BinViewConfig.BinViewHighlightMode.normal:
+				{
+					if (v == 0)
+						return "gray";
+					else if (v < 0x40)
+						return "white";
+					else if (v < 0x80)
+						return "white";
+					else if (v < 0xc0)
+						return "black";
+					else if (v < 0xff)
+						return "white";
+					else
+						return "black";
+					break;
+				}
+			case BinViewConfig.BinViewHighlightMode.ascii:
+				{
+					if (v < 0x20 || v == 0x7f) // For Control characters, including DEL
+						return "black";
+					else if (v >= 0x80) // Non ASCII
+						return "white";
+					else if (v >= 0x30 && v <= 0x39) // Numbers
+						return "white";
+					else if (v >= 0x41 && v <= 0x5a) // Large letters
+						return "black";
+					else if (v >= 0x61 && v <= 0x7a) // Small letters
+						return "white";
+					else // Special characters
+						return "white";
+					break;
+				}
+			case BinViewConfig.BinViewHighlightMode.disabled:
+			default:
+				return "unset";
+		}
+	}
+
+	private string GetHexBackgroundColor(byte v)
+	{
+		switch (BinViewConfig.HighlightMode)
+		{
+			case BinViewConfig.BinViewHighlightMode.normal:
+				{
+					if (v == 0)
+						return "black";
+					else if (v < 0x40)
+						return "gray";
+					else if (v < 0x80)
+						return "blue";
+					else if (v < 0xc0)
+						return "yellow";
+					else if (v < 0xff)
+						return "red";
+					else
+						return "white";
+					break;			
+				}
+			case BinViewConfig.BinViewHighlightMode.ascii:
+				{
+					if (v < 0x20 || v == 0x7f) // For Control characters, including DEL
+						return "white";
+					else if (v >= 0x80) // Non ASCII
+						return "red";
+					else if (v >= 0x30 && v <= 0x39) // Numbers
+						return "blue";
+					else if (v >= 0x41 && v <= 0x5a) // Large letters
+						return "yellow";
+					else if (v >= 0x61 && v <= 0x7a) // Small letters
+						return "green";
+					else // Special characters
+						return "gray";
+					break;
+				}
+			case BinViewConfig.BinViewHighlightMode.disabled:
+			default:
+				return "unset";
+		}
+	}
 }
