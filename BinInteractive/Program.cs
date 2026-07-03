@@ -7,22 +7,29 @@ using Kokuban;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 
-if (args.Length != 1)
-{
-    await Console.Out.WriteLineAsync("Usage: BinInteractive.exe <file-to-play>");
-    Environment.Exit(1);
-}
-
-var file = args[0];
-if (!File.Exists(file))
-{
-    await Console.Error.WriteLineAsync("No file exists");
-    Environment.Exit(2);
-}
-
 var interactiveConfig = new InteractiveConfig();
 
-await using (var fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+Stream fs;
+
+if (args.Length != 1)
+{
+    await Console.Out.WriteLineAsync("No file specified, using empty memory stream");
+
+    fs = new MemoryStream();
+}
+else
+{
+    var file = args[0];
+    if (!File.Exists(file))
+    {
+        await Console.Error.WriteLineAsync("No file exists");
+        Environment.Exit(2);
+    }
+    
+    fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read);
+}
+
+try
 {
     var playground = new BinPlayground.BinPlayground(fs, interactiveConfig);
     ulong commandNum = 0;
@@ -55,11 +62,13 @@ await using (var fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.
                         typeof(FileStream).Assembly,
                         typeof(ByteArrayExtensions).Assembly
                     );
-                var scr = CSharpScript.Create(command, globalsType: typeof(BinPlayground.BinPlayground), options: scriptOption);
+                var scr = CSharpScript.Create(command, globalsType: typeof(BinPlayground.BinPlayground),
+                    options: scriptOption);
                 res = await scr.RunAsync(playground);
             }
             else
                 res = await res.ContinueWithAsync(command);
+
             ret = res.ReturnValue;
         }
         catch (Exception e)
@@ -73,6 +82,10 @@ await using (var fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.
 
         await ConsoleUtils.PrintResult(ret, interactiveConfig);
     }
+}
+finally
+{
+    await fs.DisposeAsync();
 }
 
 exit:
