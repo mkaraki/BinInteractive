@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using BinPlayground.Types;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Global
@@ -231,6 +232,47 @@ namespace BinPlayground
         public static string oct(long oct) => Convert.ToString(oct, 8);
 
         public static string bin(long bin) => Convert.ToString(bin, 2);
+
+        public static string ascii(byte[] bytes)
+        {
+            return System.Text.Encoding.ASCII.GetString(bytes);
+        }
+
+        public static Bytes ascii(string text)
+        {
+            return new Bytes(System.Text.Encoding.ASCII.GetBytes(text));
+        }
+        
+        public static string utf8(byte[] bytes)
+        {
+            return System.Text.Encoding.UTF8.GetString(bytes);
+        }
+
+        public static Bytes utf8(string text)
+        {
+            return new Bytes(System.Text.Encoding.UTF8.GetBytes(text));
+        }
+
+        public static string utf16(byte[] bytes)
+        {
+            return System.Text.Encoding.Unicode.GetString(bytes);
+        }
+        
+        public static Bytes utf16(string text)
+        {
+            return new Bytes(System.Text.Encoding.Unicode.GetBytes(text));
+        }
+
+        public static string utf32(byte[] bytes)
+        {
+            return System.Text.Encoding.UTF32.GetString(bytes);
+        }
+        
+        public static Bytes utf32(string text)
+        {
+            return new Bytes(System.Text.Encoding.UTF32.GetBytes(text));
+        }
+        
 
 #pragma warning restore IDE0051 // Remove unused private members
 #pragma warning restore IDE1006 // Naming Styles

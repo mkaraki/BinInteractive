@@ -202,6 +202,9 @@ namespace BinInteractive
                 case Bytes bytes:
                     await PrintBytes(bytes, interactiveConfig);
                     break;
+                case byte[] bytes:
+                    await PrintBytes(bytes, interactiveConfig);
+                    break;
                 case IBytesBitmap bitmap:
                 {
                     for (ulong i = 0; i < bitmap.Length; i++)

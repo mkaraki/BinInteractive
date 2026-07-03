@@ -17,6 +17,10 @@ public class Bytes(byte[] bytes, ulong offset = 0) : IReadable, IEnumerable<byte
 
     public ulong offset = offset;
 
+    // Implicit cast between byte[]
+    public static implicit operator byte[](Bytes b) => b._bytes;
+    public static implicit operator Bytes(byte[] b) => new Bytes(b);
+
     public byte[] byteArray => _bytes;
 
     public long length => _bytes.LongLength;
