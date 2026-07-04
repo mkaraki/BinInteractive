@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using BinPlayground.Types.Stencils;
 using HeyRed.Mime;
@@ -11,8 +12,15 @@ using HeyRed.Mime;
 
 namespace BinPlayground
 {
-    public class BinPlayground(Stream file, InteractiveConfig conf) : IPlayable, IReadable
+    public class BinPlayground : IPlayable, IReadable
     {
+        public BinPlayground(Stream file, InteractiveConfig conf)
+        {
+            _file = file;
+            config = conf;
+            LastUsedInteractiveConfig = conf;
+        }
+
         public const int DEFAULT_READ_BUFFER_SIZE = 4096;
 
         public Bytes ReadAndRewind()
@@ -43,9 +51,11 @@ namespace BinPlayground
 
 #pragma warning disable IDE0051 // Remove unused private members
 #pragma warning disable IDE1006 // Naming Styles
-        public readonly Stream _file = file;
+        public readonly Stream _file;
 
-        public readonly InteractiveConfig config = conf;
+        public readonly InteractiveConfig config;
+
+        public static InteractiveConfig LastUsedInteractiveConfig { get; private set; }
 
         public long pos
         {
@@ -236,6 +246,59 @@ namespace BinPlayground
         {
             var pattern = PlaygroundUtils.ascii(asciiString);
             return find(pattern);
+        }
+
+        public Bytes decodeBrotli()
+        {
+            using var ds = new BrotliStream(_file, CompressionMode.Decompress, true);
+            var bufferList = new List<byte[]>();
+
+            var buffer = new byte[DEFAULT_READ_BUFFER_SIZE];
+            int readAmount;
+            while((readAmount = ds.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                bufferList.Add(buffer.Take(readAmount).ToArray());
+            }
+            return new Bytes(bufferList.SelectMany(x => x).ToArray());
+        }
+
+        public Bytes decodeDeflate()
+        {
+            using var ds = new DeflateStream(_file, CompressionMode.Decompress, true);
+            var bufferList = new List<byte[]>();
+            var buffer = new byte[DEFAULT_READ_BUFFER_SIZE];
+            int readAmount;
+            while ((readAmount = ds.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                bufferList.Add(buffer.Take(readAmount).ToArray());
+            }
+            return new Bytes(bufferList.SelectMany(x => x).ToArray());
+        }
+
+        public Bytes decodeGzip()
+        {
+            using var ds = new GZipStream(_file, CompressionMode.Decompress, true);
+            var bufferList = new List<byte[]>();
+            var buffer = new byte[DEFAULT_READ_BUFFER_SIZE];
+            int readAmount;
+            while ((readAmount = ds.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                bufferList.Add(buffer.Take(readAmount).ToArray());
+            }
+            return new Bytes(bufferList.SelectMany(x => x).ToArray());
+        }
+
+        public Bytes decodeZlib()
+        {
+            using var ds = new ZLibStream(_file, CompressionMode.Decompress, true);
+            var bufferList = new List<byte[]>();
+            var buffer = new byte[DEFAULT_READ_BUFFER_SIZE];
+            int readAmount;
+            while ((readAmount = ds.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                bufferList.Add(buffer.Take(readAmount).ToArray());
+            }
+            return new Bytes(bufferList.SelectMany(x => x).ToArray());
         }
     }
         

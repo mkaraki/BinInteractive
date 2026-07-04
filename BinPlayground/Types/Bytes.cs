@@ -2,6 +2,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using BinPlayground.Types.Stencils;
@@ -29,9 +31,12 @@ public class Bytes(byte[] bytes, ulong offset = 0) : IPlayable, IReadable, IEnum
     {
         var newBytes = new byte[length];
         Array.Copy(_bytes, 0, newBytes, 0, length);
-        _bytes = Array.Empty<byte>();
+        var currentOffset = offset;
 
-        return new Bytes(newBytes, offset);
+        _bytes = Array.Empty<byte>();
+        offset = offset + (ulong)length;
+
+        return new Bytes(newBytes, currentOffset);
     }
 
     public Bytes read(ulong len)
@@ -43,13 +48,15 @@ public class Bytes(byte[] bytes, ulong offset = 0) : IPlayable, IReadable, IEnum
 
         var newBytes = new byte[len];
         Array.Copy(_bytes, 0, newBytes, 0, (long)len);
+        var currentOffset = offset;
 
         var remainCopySize = _bytes.Length - (int)len;
         var remainBytes = new byte[remainCopySize];
         Array.Copy(_bytes, (long)len, remainBytes, 0, remainCopySize);
         _bytes = remainBytes;
+        offset += len;
 
-        return new Bytes(newBytes, offset);
+        return new Bytes(newBytes, currentOffset);
     }
 
     public IEnumerator<StencilParsedSection> stencil(string stencilName)
@@ -131,15 +138,15 @@ public class Bytes(byte[] bytes, ulong offset = 0) : IPlayable, IReadable, IEnum
             var (start, length) = range.GetOffsetAndLength(_bytes.Length);
             var newBytes = new byte[length];
             Array.Copy(_bytes, start, newBytes, 0, length);
-            return new Bytes(newBytes, (ulong)start);
+            return new Bytes(newBytes, this.offset + (ulong)start);
         }
     }
 
-    public Bytes skip(int count) => new(_bytes.Skip(count).ToArray());
+    public Bytes skip(int count) => new(_bytes.Skip(count).ToArray(), offset + (ulong)count);
 
-    public Bytes take(int count) => new(_bytes.Take(count).ToArray());
+    public Bytes take(int count) => new(_bytes.Take(count).ToArray(), offset);
 
-    public Bytes reverse() => new(_bytes.Reverse().ToArray());
+    public Bytes reverse() => new(_bytes.Reverse().ToArray(), offset);
 
     public Bytes le2be(int packedEach = 1)
     {
@@ -229,6 +236,63 @@ public class Bytes(byte[] bytes, ulong offset = 0) : IPlayable, IReadable, IEnum
         var asciiBytes = Encoding.ASCII.GetBytes(asciiString);
         return find(asciiBytes);
     }
+
+    public Bytes decodeBrotli()
+    {
+        using var ms = new MemoryStream(_bytes);
+        using var ds = new BrotliStream(ms, CompressionMode.Decompress, true);
+        var bufferList = new List<byte[]>();
+        var buffer = new byte[BinPlayground.DEFAULT_READ_BUFFER_SIZE];
+        int readAmount;
+        while ((readAmount = ds.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            bufferList.Add(buffer.Take(readAmount).ToArray());
+        }
+        return new Bytes(bufferList.SelectMany(x => x).ToArray());
+    }
+
+    public Bytes decodeDeflate()
+    {
+        using var ms = new MemoryStream(_bytes);
+        using var ds = new DeflateStream(ms, CompressionMode.Decompress, true);
+        var bufferList = new List<byte[]>();
+        var buffer = new byte[BinPlayground.DEFAULT_READ_BUFFER_SIZE];
+        int readAmount;
+        while ((readAmount = ds.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            bufferList.Add(buffer.Take(readAmount).ToArray());
+        }
+        return new Bytes(bufferList.SelectMany(x => x).ToArray());
+    }
+
+    public Bytes decodeGzip()
+    {
+        using var ms = new MemoryStream(_bytes);
+        using var ds = new GZipStream(ms, CompressionMode.Decompress, true);
+        var bufferList = new List<byte[]>();
+        var buffer = new byte[BinPlayground.DEFAULT_READ_BUFFER_SIZE];
+        int readAmount;
+        while ((readAmount = ds.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            bufferList.Add(buffer.Take(readAmount).ToArray());
+        }
+        return new Bytes(bufferList.SelectMany(x => x).ToArray());
+    }
+
+    public Bytes decodeZlib()
+    {
+        using var ms = new MemoryStream(_bytes);
+        using var ds = new ZLibStream(ms, CompressionMode.Decompress, true);
+        var bufferList = new List<byte[]>();
+        var buffer = new byte[BinPlayground.DEFAULT_READ_BUFFER_SIZE];
+        int readAmount;
+        while ((readAmount = ds.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            bufferList.Add(buffer.Take(readAmount).ToArray());
+        }
+        return new Bytes(bufferList.SelectMany(x => x).ToArray());
+    }
+
 
     // ====================================
     // Utilities for 1 byte

@@ -43,6 +43,13 @@ namespace BinPlayground.Types
 
         public IEnumerator<ulong> find(string asciiString);
 
+        public Bytes decodeBrotli();
+
+        public Bytes decodeDeflate();
+
+        public Bytes decodeGzip();
+
+        public Bytes decodeZlib();
 
 #pragma warning restore IDE0051 // Remove unused private members
 #pragma warning restore IDE1006 // Naming Styles

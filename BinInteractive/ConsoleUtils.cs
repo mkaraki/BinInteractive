@@ -8,7 +8,7 @@ namespace BinInteractive
 {
     internal static class ConsoleUtils
     {
-        public static async Task PrintBytes(Bytes bytes, InteractiveConfig interactiveConfig)
+        public static async Task PrintBytes(Bytes bytes, InteractiveConfig interactiveConfig, CancellationToken cToken)
         {
             if (interactiveConfig.HexWidth < 1)
             {
@@ -21,6 +21,11 @@ namespace BinInteractive
             }
             for (long i = 0; i < bytes.length; i++)
             {
+                if (cToken.IsCancellationRequested)
+                {
+                    break;
+                }
+
                 var realPos = (ulong)i + bytes.offset;
 
                 if (i % interactiveConfig.HexWidth == 0)
@@ -193,7 +198,7 @@ namespace BinInteractive
             await Console.Out.WriteAsync(color.Render($"{value:X2}"));
         }
 
-        internal static async Task PrintResult(object? ret, InteractiveConfig interactiveConfig)
+        internal static async Task PrintResult(object? ret, InteractiveConfig interactiveConfig, CancellationToken cToken)
         {
             if (ret == null)
             {
@@ -206,15 +211,18 @@ namespace BinInteractive
                 case null:
                     return;
                 case Bytes bytes:
-                    await PrintBytes(bytes, interactiveConfig);
+                    await PrintBytes(bytes, interactiveConfig, cToken);
                     break;
                 case byte[] bytes:
-                    await PrintBytes(bytes, interactiveConfig);
+                    await PrintBytes(bytes, interactiveConfig, cToken);
                     break;
                 case IBytesBitmap bitmap:
                 {
                     for (ulong i = 0; i < bitmap.Length; i++)
                     {
+                        if (cToken.IsCancellationRequested)
+                            break;
+
                         if (interactiveConfig.BitmapWidth > 0 && i % (uint)interactiveConfig.BitmapWidth == 0)
                         {
                             Console.ResetColor();
@@ -237,7 +245,10 @@ namespace BinInteractive
                     {
                         while (enumerator.MoveNext())
                         {
-                            await PrintResult(enumerator.Current, interactiveConfig);
+                            if (cToken.IsCancellationRequested)
+                                break;
+
+                            await PrintResult(enumerator.Current, interactiveConfig, cToken);
                         }
                     }
                     catch (Exception e)
@@ -254,11 +265,24 @@ namespace BinInteractive
                     await Console.Out.WriteLineAsync($"0x{i:X8}");
                     break;
                 }
+                case ulong[] arr:
+                {
+                    foreach (var i in arr)
+                    {
+                        if (cToken.IsCancellationRequested)
+                            break;
+                        await Console.Out.WriteLineAsync($"0x{i:X8}");
+                    }
+                    break;
+                }
                 case StencilParsedSection section:
                 {
                     await Console.Out.WriteAsync($"0x{section.Address:X8}: ");
                     foreach (byte b in section.Data)
                     {
+                        if (cToken.IsCancellationRequested)
+                            break;
+
                         await Console.Out.WriteAsync($"{b:X2} ");
                     }
                     await Console.Out.WriteLineAsync($": {section.Description} ({section.ParsedValue})");

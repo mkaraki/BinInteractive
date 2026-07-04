@@ -1,9 +1,6 @@
-﻿using System.Collections;
-using BinInteractive;
+﻿using BinInteractive;
 using BinPlayground;
 using BinPlayground.Types;
-using BinPlayground.Types.Stencils;
-using Kokuban;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 
@@ -29,6 +26,21 @@ else
     fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read);
 }
 
+CancellationTokenSource? cts = null;
+
+Console.CancelKeyPress += (sender, eventArgs) =>
+{
+    if (cts != null && !cts.Token.IsCancellationRequested)
+    {
+        eventArgs.Cancel = true;
+        Console.WriteLine();
+        Console.ResetColor();
+        Console.WriteLine("! Perform cancellation. Re-type Ctrl+C to force exit.");
+        Console.WriteLine();
+        cts.Cancel();
+    }
+};
+
 try
 {
     var playground = new BinPlayground.BinPlayground(fs, interactiveConfig);
@@ -38,6 +50,7 @@ try
 
     while (true)
     {
+
         await Console.Out.WriteAsync($"{commandNum++}::{playground.pos:X8}> ");
         var command = (await Console.In.ReadLineAsync())?.Trim();
         switch (command)
@@ -51,25 +64,29 @@ try
                 goto exit;
         }
 
-        object ret;
+        cts = new CancellationTokenSource();
         try
         {
             if (res == null)
             {
                 var scriptOption = ScriptOptions.Default
-                    .WithImports("System", "System.IO", "System.Text", "BinPlayground.Types", "BinPlayground.PlaygroundUtils")
+                    .WithImports("System", "System.IO", "System.Text", "BinPlayground.Types",
+                        "BinPlayground.PlaygroundUtils", "BinPlayground.Extensions", "System.Collections.Generic",
+                        "System.Linq")
                     .WithReferences(
                         typeof(FileStream).Assembly,
                         typeof(ByteArrayExtensions).Assembly
                     );
                 var scr = CSharpScript.Create(command, globalsType: typeof(BinPlayground.BinPlayground),
                     options: scriptOption);
-                res = await scr.RunAsync(playground);
+                res = await scr.RunAsync(playground, cts.Token);
             }
             else
-                res = await res.ContinueWithAsync(command);
+                res = await res.ContinueWithAsync(command, null, cts.Token);
 
-            ret = res.ReturnValue;
+            object? ret = res.ReturnValue;
+
+            await ConsoleUtils.PrintResult(ret, interactiveConfig, cts.Token);
         }
         catch (Exception e)
         {
@@ -77,10 +94,12 @@ try
             Console.ForegroundColor = ConsoleColor.Red;
             await Console.Out.WriteLineAsync(e.Message);
             Console.ResetColor();
-            continue;
         }
-
-        await ConsoleUtils.PrintResult(ret, interactiveConfig);
+        finally
+        {
+            cts?.Dispose();
+            cts = null;
+        }
     }
 }
 finally
