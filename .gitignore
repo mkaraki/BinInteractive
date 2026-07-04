@@ -364,3 +364,6 @@ FodyWeavers.xsd
 /BinView/wwwroot/bootstrap/css
 
 TestResults
+
+# For Doxygen
+/html
