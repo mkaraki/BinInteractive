@@ -13,11 +13,32 @@ using BinPlayground.Types.Stencils;
 
 namespace BinPlayground.Types;
 
-public class Bytes(byte[] bytes, ulong offset = 0) : IPlayable, IReadable, IEnumerable<byte>
+public class Bytes : IPlayable, IReadable, IEnumerable<byte>
 {
-    public byte[] _bytes = bytes;
+    public Bytes()
+    {
+        _bytes = [];
+        offset = 0;
+    }
 
-    public ulong offset = offset;
+    public Bytes(byte[] bytes, ulong offset = 0)
+    {
+        _bytes = bytes;
+        this.offset = offset;
+    }
+
+    public byte[] _bytes;
+
+    public ulong offset;
+
+    // To support: `new Bytes {0x00, 0x01, ...}` expression
+    public void Add(byte item)
+    {
+        var newBytes = new byte[length + 1];
+        Array.Copy(_bytes, newBytes, length);
+        newBytes[length] = item;
+        _bytes = newBytes;
+    }
 
     // Implicit cast between byte[]
     public static implicit operator byte[](Bytes b) => b._bytes;
@@ -428,4 +449,19 @@ public class Bytes(byte[] bytes, ulong offset = 0) : IPlayable, IReadable, IEnum
     // ====================================
     // End of utilities
     // ====================================
+
+    // XOR operator
+    public static Bytes operator ^(Bytes left, Bytes right)
+    {
+        var loopMax = (ulong)Math.Min(left.length, right.length);
+
+        var cpy = (Bytes)left.MemberwiseClone();
+
+        for (ulong i = 0; i < loopMax; i++)
+        {
+            cpy._bytes[i] = (byte)(left._bytes[i] ^ right._bytes[i]);
+        }
+
+        return cpy;
+    }
 }
