@@ -23,6 +23,7 @@ namespace BinPlayground.Types
             }
 
             var startPos = b.pos;
+            b.pos = (int)targetStart;
             var color = b.ReadAndRewind(3).ToList();
             b.pos = startPos;
 

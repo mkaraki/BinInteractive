@@ -14,6 +14,7 @@
             }
 
             var startPos = b.pos;
+            b.pos = (int)pixel;
             var byteInfo = b.ReadAndRewind(1)._bytes;
             b.pos = startPos;
 
