@@ -28,7 +28,7 @@
 	[Parameter]
     public Bytes Bytes { get; set; }
 
-	private BytesBitmap Bitmap => Bytes.bitmap;
+	private BytesBitmap Bitmap => (BytesBitmap)Bytes.bitmap;
 
 	public async Task Update()
 	{
