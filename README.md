@@ -47,3 +47,5 @@ $ ls html
 index.html
 ︙
 ```
+
+Or, you can check out the pre-built version of the document at [https://mkarakiapps.com/BinInteractive/](https://mkarakiapps.com/BinInteractive/).
