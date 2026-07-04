@@ -11,7 +11,7 @@ using BinPlayground.Types.Stencils;
 
 namespace BinPlayground.Types;
 
-public class Bytes(byte[] bytes, ulong offset = 0) : IReadable, IEnumerable<byte>
+public class Bytes(byte[] bytes, ulong offset = 0) : IPlayable, IReadable, IEnumerable<byte>
 {
     public byte[] _bytes = bytes;
 
@@ -97,9 +97,9 @@ public class Bytes(byte[] bytes, ulong offset = 0) : IReadable, IEnumerable<byte
 
     public string hex => BitConverter.ToString(_bytes).Replace("-", " ");
 
-    public BytesBitmap bitmap => new(_bytes);
+    public IBytesBitmap bitmap => new BytesBitmap(_bytes);
 
-    public BytesBitmap1D bitmap1d => new(_bytes);
+    public IBytesBitmap bitmap1d => new BytesBitmap1D(_bytes);
 
     public string magic
     {
@@ -141,7 +141,7 @@ public class Bytes(byte[] bytes, ulong offset = 0) : IReadable, IEnumerable<byte
 
     public Bytes reverse() => new(_bytes.Reverse().ToArray());
 
-    public Bytes le2be(int packedEach)
+    public Bytes le2be(int packedEach = 1)
     {
         var newSize = _bytes.LongLength;
         if (_bytes.LongLength % packedEach != 0)
@@ -159,7 +159,7 @@ public class Bytes(byte[] bytes, ulong offset = 0) : IReadable, IEnumerable<byte
         return new(newByte, offset);
     }
 
-    public Bytes be2le(int packetEach) => le2be(packetEach);
+    public Bytes be2le(int packetEach = 1) => le2be(packetEach);
 
     public Bytes padRight(long num)
     {
@@ -234,57 +234,57 @@ public class Bytes(byte[] bytes, ulong offset = 0) : IReadable, IEnumerable<byte
     // Utilities for 1 byte
     // ====================================
 
-    public ushort? uint8 => BinPlayground.uint8(_bytes);
+    public ushort? uint8 => PlaygroundUtils.uint8(_bytes);
 
-    public short? int8 => BinPlayground.int8(_bytes);
+    public short? int8 => PlaygroundUtils.int8(_bytes);
 
     // ====================================
     // Utilities for 2 bytes
     // ====================================
 
-    public ushort? uint16le => BinPlayground.uint16le(_bytes);
+    public ushort? uint16le => PlaygroundUtils.uint16le(_bytes);
 
-    public ushort? uint16be => BinPlayground.uint16be(_bytes);
+    public ushort? uint16be => PlaygroundUtils.uint16be(_bytes);
 
-    public short? int16le => BinPlayground.int16le(_bytes);
+    public short? int16le => PlaygroundUtils.int16le(_bytes);
 
-    public short? int16be => BinPlayground.int16be(_bytes);
+    public short? int16be => PlaygroundUtils.int16be(_bytes);
 
-    public Half? float16le => BinPlayground.float16le(_bytes);
+    public Half? float16le => PlaygroundUtils.float16le(_bytes);
 
-    public Half? float16be => BinPlayground.float16be(_bytes);
+    public Half? float16be => PlaygroundUtils.float16be(_bytes);
 
     // ====================================
     // Utilities for 4 bytes
     // ====================================
 
-    public uint? uint32le => BinPlayground.uint32le(_bytes);
+    public uint? uint32le => PlaygroundUtils.uint32le(_bytes);
 
-    public uint? uint32be => BinPlayground.uint32be(_bytes);
+    public uint? uint32be => PlaygroundUtils.uint32be(_bytes);
 
-    public int? int32le => BinPlayground.int32le(_bytes);
+    public int? int32le => PlaygroundUtils.int32le(_bytes);
 
-    public int? int32be => BinPlayground.int32be(_bytes);
+    public int? int32be => PlaygroundUtils.int32be(_bytes);
 
-    public float? float32le => BinPlayground.float32le(_bytes);
+    public float? float32le => PlaygroundUtils.float32le(_bytes);
 
-    public float? float32be => BinPlayground.float32be(_bytes);
+    public float? float32be => PlaygroundUtils.float32be(_bytes);
 
     // ====================================
     // Utilities for 8 bytes
     // ====================================
 
-    public ulong? uint64le => BinPlayground.uint64le(_bytes);
+    public ulong? uint64le => PlaygroundUtils.uint64le(_bytes);
 
-    public ulong? uint64be => BinPlayground.uint64be(_bytes);
+    public ulong? uint64be => PlaygroundUtils.uint64be(_bytes);
 
-    public long? int64le => BinPlayground.int64le(_bytes);
+    public long? int64le => PlaygroundUtils.int64le(_bytes);
 
-    public long? int64be => BinPlayground.int64be(_bytes);
+    public long? int64be => PlaygroundUtils.int64be(_bytes);
 
-    public double? float64le => BinPlayground.float64le(_bytes);
+    public double? float64le => PlaygroundUtils.float64le(_bytes);
 
-    public double? float64be => BinPlayground.float64be(_bytes);
+    public double? float64be => PlaygroundUtils.float64be(_bytes);
 
     // ====================================
     // Utilities for BCD

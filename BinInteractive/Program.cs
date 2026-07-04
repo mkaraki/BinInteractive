@@ -57,7 +57,7 @@ try
             if (res == null)
             {
                 var scriptOption = ScriptOptions.Default
-                    .WithImports("System", "System.IO", "System.Text", "BinPlayground.Types")
+                    .WithImports("System", "System.IO", "System.Text", "BinPlayground.Types", "BinPlayground.PlaygroundUtils")
                     .WithReferences(
                         typeof(FileStream).Assembly,
                         typeof(ByteArrayExtensions).Assembly

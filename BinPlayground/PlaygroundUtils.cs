@@ -7,7 +7,7 @@ using BinPlayground.Types;
 
 namespace BinPlayground
 {
-    public partial class BinPlayground
+    public static class PlaygroundUtils
     {
 #pragma warning disable IDE0051 // Remove unused private members
 #pragma warning disable IDE1006 // Naming Styles

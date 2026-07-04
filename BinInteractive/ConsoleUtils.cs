@@ -195,6 +195,12 @@ namespace BinInteractive
 
         internal static async Task PrintResult(object? ret, InteractiveConfig interactiveConfig)
         {
+            if (ret == null)
+            {
+                await Console.Out.WriteLineAsync("null");
+                return;
+            }
+
             switch (ret)
             {
                 case null:
