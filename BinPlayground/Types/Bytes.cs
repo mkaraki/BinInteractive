@@ -27,6 +27,13 @@ public class Bytes : IPlayable, IReadable, IEnumerable<byte>
         this.offset = offset;
     }
 
+    public Bytes Clone()
+    {
+        var copy = new Bytes(new byte[length], offset);
+        Array.Copy(_bytes, copy._bytes, length);
+        return copy;
+    }
+
     public byte[] _bytes;
 
     public ulong offset;
@@ -54,8 +61,8 @@ public class Bytes : IPlayable, IReadable, IEnumerable<byte>
         Array.Copy(_bytes, 0, newBytes, 0, length);
         var currentOffset = offset;
 
+        offset += (ulong)length;
         _bytes = Array.Empty<byte>();
-        offset = offset + (ulong)length;
 
         return new Bytes(newBytes, currentOffset);
     }
@@ -74,8 +81,8 @@ public class Bytes : IPlayable, IReadable, IEnumerable<byte>
         var remainCopySize = _bytes.Length - (int)len;
         var remainBytes = new byte[remainCopySize];
         Array.Copy(_bytes, (long)len, remainBytes, 0, remainCopySize);
-        _bytes = remainBytes;
         offset += len;
+        _bytes = remainBytes;
 
         return new Bytes(newBytes, currentOffset);
     }
@@ -375,19 +382,6 @@ public class Bytes : IPlayable, IReadable, IEnumerable<byte>
     // Utilities for BCD
     // ====================================
 
-    public static ushort bcdToUshort(byte bcd)
-    {
-        ushort tens = (ushort)(bcd >> 4);
-        ushort ones = (ushort)(bcd & 0x0F);
-
-        if (tens > 9 || ones > 9)
-        {
-            throw new ArgumentException($"Input byte {bcd:X2} is not valid BCD.", nameof(bcd));
-        }
-
-        return (ushort)((tens * 10) + ones);
-    }
-
     public ulong bcdLe()
     {
         var bytes = _bytes;
@@ -402,7 +396,7 @@ public class Bytes : IPlayable, IReadable, IEnumerable<byte>
 
         for (int i = 0; i < bytes.Length; i++)
         {
-            ushort bcdValue = bcdToUshort(bytes[i]);
+            ushort bcdValue = PlaygroundUtils.bcdToUshort(bytes[i]);
             result += (ulong)bcdValue * multiplexer;
             multiplexer *= 100;
         }
@@ -423,7 +417,7 @@ public class Bytes : IPlayable, IReadable, IEnumerable<byte>
 
         for (int i = 0; i < bytes.Length; i++)
         {
-            ushort bcdValue = bcdToUshort(bytes[i]);
+            ushort bcdValue = PlaygroundUtils.bcdToUshort(bytes[i]);
             result = (result * 100) + (ulong)bcdValue;  
         }
 
@@ -455,7 +449,7 @@ public class Bytes : IPlayable, IReadable, IEnumerable<byte>
     {
         var loopMax = (ulong)Math.Min(left.length, right.length);
 
-        var cpy = (Bytes)left.MemberwiseClone();
+        var cpy = left.Clone();
 
         for (ulong i = 0; i < loopMax; i++)
         {
@@ -464,4 +458,30 @@ public class Bytes : IPlayable, IReadable, IEnumerable<byte>
 
         return cpy;
     }
+
+    public static Bytes operator ^(Bytes left, byte[] right) => left ^ new Bytes(right);
+
+    public static Bytes operator ^(byte[] left, Bytes right) => new Bytes(left) ^ right;
+
+    // == operator
+    public static bool operator ==(Bytes? left, Bytes? right)
+    {
+        var leftNull = left is null;
+        var rightNull = right is null;
+
+        if (leftNull && rightNull)
+            return true;
+        else if (leftNull || rightNull)
+            return false;
+
+        if (left.length != right.length)
+            return false;
+
+        // offset must be ignored.
+
+        return left._bytes.SequenceEqual(right._bytes);
+    }
+
+    // != operator
+    public static bool operator !=(Bytes? left, Bytes? right) => !(left == right);
 }

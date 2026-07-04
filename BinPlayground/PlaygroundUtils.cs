@@ -227,6 +227,19 @@ namespace BinPlayground
             return BitConverter.ToDouble(bytes.Take(8).Reverse().ToArray());
         }
 
+        public static ushort bcdToUshort(byte bcd)
+        {
+            ushort tens = (ushort)(bcd >> 4);
+            ushort ones = (ushort)(bcd & 0x0F);
+
+            if (tens > 9 || ones > 9)
+            {
+                throw new ArgumentException($"Input byte {bcd:X2} is not valid BCD.", nameof(bcd));
+            }
+
+            return (ushort)((tens * 10) + ones);
+        }
+
         public static string hex(long hex) => hex.ToString("X");
 
         public static string oct(long oct) => Convert.ToString(oct, 8);
